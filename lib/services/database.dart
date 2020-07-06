@@ -8,12 +8,9 @@ class DatabaseService {
   final CollectionReference scoutCollection =
       Firestore.instance.collection('scouts');
 
-  Future updateUserData(
-      String firstName, String lastName, int troop, int rank) async {
+  Future updateUserData(String username, int rank) async {
     return await scoutCollection.document(uid).setData({
-      'firstName': firstName,
-      'lastName': lastName,
-      'troop': troop,
+      'username': username,
       'rank': rank,
     });
   }

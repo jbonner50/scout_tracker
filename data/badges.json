@@ -1,0 +1,10 @@
+{
+  "Woodworking": {
+    "1": ["first req", "second req", "third req"],
+    "2": ["first req", "second req", "third req"]
+  },
+  "Camping": {
+    "1": ["first req", "second req", "third req"],
+    "2": ["first req", "second req", "third req"]
+  }
+}
