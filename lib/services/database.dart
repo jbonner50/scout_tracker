@@ -8,11 +8,14 @@ class DatabaseService {
   final CollectionReference scoutCollection =
       Firestore.instance.collection('scouts');
 
-  Future updateUserData(String username, int rank) async {
-    return await scoutCollection.document(uid).setData({
+  Future createScout(String username, int rank) async {
+    return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
-    });
+    }).then((_) => scoutCollection.document(uid).collection('advancement')
+      ..document('rank')
+      ..document('meritbadge')
+      ..document('profile'));
   }
 
 //   //brew list from snapshot

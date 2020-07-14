@@ -21,7 +21,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   int _rank = 0;
   String _email;
-  String _password;
+  String _pass;
 
   //FocusNode _firstNameFocus;
 
@@ -103,11 +103,11 @@ class _RegisterFormState extends State<RegisterForm> {
             if (_registerFormKey.currentState.validate()) {
               _registerFormKey.currentState.save();
               print(_email);
-              print(_password);
+              print(_pass);
               print(_rank);
               setState(() => _isLoading = true);
               dynamic result = await AuthService()
-                  .registerWithEmailAndPassword(_email, _password, _rank);
+                  .register(email: _email, pass: _pass, rank: _rank);
               if (result == null) setState(() => _isLoading = false);
             } else {
               print('invalid');
@@ -198,7 +198,7 @@ class _RegisterFormState extends State<RegisterForm> {
                     else
                       return null;
                   },
-                  onSaved: (password) => _password = password,
+                  onSaved: (password) => _pass = password,
                   style: TextStyle(fontSize: 20, color: Colors.black),
                   obscureText: _obscurePasswordLogin,
                   decoration: InputDecoration(

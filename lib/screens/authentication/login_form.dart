@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:scout_tracker/services/auth.dart';
-import 'package:scout_tracker/shared.dart';
+
+enum Progress { button, loading, success }
 
 class LoginForm extends StatefulWidget {
   @override
@@ -18,86 +19,110 @@ class _LoginFormState extends State<LoginForm> {
   bool _autoValidateEmail = false;
   bool _autoovalidatePassword = false;
 
-  bool _isLoading = false;
+  Progress _progress = Progress.button;
   String _email;
-  String _password;
+  String _pass;
 
-  Widget _buildButton() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(50)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8, // soften the shadow
-            spreadRadius: 1, //extend the shadow
-            offset: Offset(
-              0, // Move to right 10  horizontally
-              3, // Move to bottom 10 Vertically
-            ),
-          )
-          // BoxShadow(
-          //   color: Colors.amber[200],
-          //   offset: Offset(1, 6),
-          //   blurRadius: 10,
-          //   spreadRadius: 1,
-          // ),
-          // BoxShadow(
-          //   color: Colors.redAccent,
-          //   offset: Offset(1, 6),
-          //   blurRadius: 10,
-          //   spreadRadius: 1,
-          // ),
-        ],
-        gradient: new LinearGradient(
-            colors: [
-              Colors.redAccent,
-              Colors.amber[200],
+  Widget _buildButton(progress) {
+    switch (progress) {
+      case Progress.loading:
+        return SpinKitThreeBounce(
+          color: Colors.redAccent[100],
+        );
+      case Progress.success:
+        return Container(
+          key: ValueKey(2),
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.greenAccent,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.check, color: Colors.white, size: 40),
+        );
+      default:
+        return Container(
+          key: ValueKey(1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 8, // soften the shadow
+                spreadRadius: 1, //extend the shadow
+                offset: Offset(
+                  0, // Move to right 10  horizontally
+                  3, // Move to bottom 10 Vertically
+                ),
+              )
+              // BoxShadow(
+              //   color: Colors.amber[200],
+              //   offset: Offset(1, 6),
+              //   blurRadius: 10,
+              //   spreadRadius: 1,
+              // ),
+              // BoxShadow(
+              //   color: Colors.redAccent,
+              //   offset: Offset(1, 6),
+              //   blurRadius: 10,
+              //   spreadRadius: 1,
+              // ),
             ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            stops: [0, 1],
-            tileMode: TileMode.clamp),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.all(Radius.circular(80)),
-          onTap: () async {
-            if (_loginFormKey.currentState.validate()) {
-              _loginFormKey.currentState.save();
-              print(_email);
-              print(_password);
-              setState(() => _isLoading = true);
-              dynamic result = await AuthService()
-                  .signInWithEmailAndPassword(_email, _password);
-              if (result == null) setState(() => _isLoading = false);
-            } else {
-              print('invalid');
-              setState(() {
-                _autoValidateEmail = true;
-                _autoovalidatePassword = true;
-              });
-            }
-          },
-          highlightColor: Colors.transparent,
-          splashColor: Colors.redAccent,
-          //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 50),
-            child: Text(
-              "Login",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+            gradient: new LinearGradient(
+                colors: [
+                  Colors.redAccent,
+                  Colors.amber[200],
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                stops: [0, 1],
+                tileMode: TileMode.clamp),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.all(Radius.circular(80)),
+              onTap: () async {
+                if (_loginFormKey.currentState.validate()) {
+                  _loginFormKey.currentState.save();
+                  print(_email);
+                  print(_pass);
+                  setState(() => _progress = Progress.loading);
+                  AuthResultStatus status =
+                      await AuthService().login(email: _email, pass: _pass);
+                  if (status == AuthResultStatus.successful) {
+                    setState(() => _progress = Progress.success);
+                  } else {
+                    // TODO give an error message
+                    setState(() => _progress = Progress.button);
+                  }
+                } else {
+                  print('invalid');
+                  setState(() {
+                    _autoValidateEmail = true;
+                    _autoovalidatePassword = true;
+                  });
+                }
+              },
+              highlightColor: Colors.transparent,
+              splashColor: Colors.redAccent,
+              //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 50),
+                child: Text(
+                  "Login",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
+        );
+    }
   }
 
   @override
@@ -150,7 +175,7 @@ class _LoginFormState extends State<LoginForm> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     icon: Icon(
-                      Icons.mail,
+                      Icons.mail_outline,
                       color: Colors.black,
                     ),
                     hintText: "Email Address",
@@ -172,7 +197,7 @@ class _LoginFormState extends State<LoginForm> {
                     else
                       return null;
                   },
-                  onSaved: (password) => _password = password,
+                  onSaved: (password) => _pass = password,
                   style: TextStyle(fontSize: 20, color: Colors.black),
                   obscureText: _obscurePasswordLogin,
                   decoration: InputDecoration(
@@ -205,12 +230,19 @@ class _LoginFormState extends State<LoginForm> {
                   height: 70,
                   alignment: Alignment.center,
                   child: AnimatedSwitcher(
-                      duration: Duration(milliseconds: 200),
-                      child: !_isLoading
-                          ? _buildButton()
-                          : SpinKitThreeBounce(
-                              color: Colors.deepOrangeAccent,
-                            )),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    duration: Duration(milliseconds: 200),
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(child: child, scale: animation),
+                    child: _buildButton(_progress),
+
+                    //   _progess ==
+                    // ? _buildButton()
+                    // : SpinKitThreeBounce(
+                    //     color: Colors.deepOrangeAccent,
+                    //   )),
+                  ),
                 ),
               ],
             ),
