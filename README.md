@@ -1,16 +1,7 @@
 # scout_tracker
 
-A new Flutter project.
+An IOS and Android application for Boy Scouts to track Rank and Merit Badge progress.
 
-## Getting Started
+# Email Verification
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Email verifcation link must be opened on your mobile device. If you were sent to this page instead, it is because you opened your verification link on a computer instead.
