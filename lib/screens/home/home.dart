@@ -21,9 +21,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _icon = Icon(Icons.add);
 
   List<Widget> _tabs = [
-    Rank(),
-    Badges(),
-    Profile(),
+    Rank(ValueKey(1)),
+    Badges(ValueKey(2)),
+    Profile(ValueKey(3)),
   ];
 
   @override
@@ -54,7 +54,33 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _tabs.elementAt(_selectedIndex),
+      body: Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.topCenter,
+        children: [
+          // top gradient
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            alignment: Alignment.topRight,
+            decoration: new BoxDecoration(
+              gradient: new LinearGradient(
+                colors: [
+                  Colors.amber[200],
+                  Colors.redAccent,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: AnimatedSwitcher(
+                duration: Duration(milliseconds: 200),
+                child: _tabs.elementAt(_selectedIndex)),
+          ),
+        ],
+      ),
       // floatingActionButton: SpeedDial(
       //   backgroundColor: Colors.white,
       //   foregroundColor: Colors.redAccent[100],

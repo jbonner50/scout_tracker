@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         value: SystemUiOverlayStyle(
             systemNavigationBarColor: Colors.white,
             systemNavigationBarIconBrightness: Brightness.dark,
-            statusBarColor: Colors.transparent,
+            statusBarColor: Colors.white12,
             statusBarIconBrightness: Brightness.light),
         child: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (overscroll) {
