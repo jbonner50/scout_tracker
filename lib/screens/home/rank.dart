@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:scout_tracker/services/auth.dart';
+import 'dart:io';
 
 class Rank extends StatefulWidget {
-  final Key key;
-  Rank(this.key);
+  Rank({Key key}) : super(key: key);
 
   @override
   _RankState createState() => _RankState();
@@ -12,12 +12,6 @@ class Rank extends StatefulWidget {
 class _RankState extends State<Rank> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      key: widget.key,
-      child: RaisedButton(
-        child: Text('sign out'),
-        onPressed: () => AuthService().logout(),
-      ),
-    );
+    return Center(child: RaisedButton(onPressed: () => AuthService().logout()));
   }
 }

@@ -4,8 +4,8 @@ import 'package:scout_tracker/services/auth.dart';
 import 'package:scout_tracker/shared.dart';
 
 class Profile extends StatefulWidget {
-  final Key key;
-  Profile(this.key);
+  Profile({Key key}) : super(key: key);
+
   @override
   _ProfileState createState() => _ProfileState();
 }
@@ -435,13 +435,12 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      key: widget.key,
       child: Column(
         children: [
           Container(
             height: MediaQuery.of(context).size.height / 3.5,
             width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
+            padding: EdgeInsets.fromLTRB(40, 10, 40, 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

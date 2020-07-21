@@ -27,9 +27,31 @@ class _WrapperState extends State<Wrapper> {
       setState(() => _body = Home());
     }
     //loading = not received; null = no user; full uid = signed in
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 400),
-      child: _body,
+    return Stack(
+      fit: StackFit.expand,
+      alignment: Alignment.topCenter,
+      children: [
+        // top gradient
+        Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          alignment: Alignment.topRight,
+          decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+              colors: [
+                Colors.amber[200],
+                Colors.redAccent,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        AnimatedSwitcher(
+          duration: Duration(milliseconds: 400),
+          child: _body,
+        ),
+      ],
     );
   }
 }

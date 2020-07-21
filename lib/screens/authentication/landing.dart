@@ -151,23 +151,21 @@ class _LandingState extends State<Landing> {
       width: 300,
       padding: EdgeInsets.all(5),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30), color: Colors.black12),
+          borderRadius: BorderRadius.circular(30), color: Colors.white24),
       child: Center(
-        child: Container(
-          child: TabBar(
-            unselectedLabelColor: Colors.white,
-            labelColor: Colors.black,
-            labelStyle: TextStyle(
-                fontSize: 20,
-                fontFamily: 'ProductSans',
-                fontWeight: FontWeight.bold),
-            indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(30), color: Colors.white),
-            tabs: [
-              Tab(text: 'Login'),
-              Tab(text: 'Register'),
-            ],
-          ),
+        child: TabBar(
+          unselectedLabelColor: Colors.white,
+          labelColor: Colors.black,
+          labelStyle: TextStyle(
+              fontSize: 20,
+              fontFamily: 'ProductSans',
+              fontWeight: FontWeight.bold),
+          indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(30), color: Colors.white),
+          tabs: [
+            Tab(text: 'Login'),
+            Tab(text: 'Register'),
+          ],
         ),
       ),
     );
