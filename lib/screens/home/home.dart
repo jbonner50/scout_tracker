@@ -1,10 +1,4 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:scout_tracker/screens/home/badges.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
 import 'package:scout_tracker/screens/home/rank.dart';
@@ -72,9 +66,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         //   backgroundColor: Colors.white12,
         // ),
         body: SafeArea(
-          child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 200),
-              child: _tabs.elementAt(_selectedIndex)),
+          child:
+              // AnimatedSwitcher(
+              //     duration: Duration(milliseconds: 200),
+              //     child:
+              _tabs.elementAt(_selectedIndex),
         ),
 
         // floatingActionButton: SpeedDial(

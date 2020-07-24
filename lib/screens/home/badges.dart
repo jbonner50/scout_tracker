@@ -1,7 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:scout_tracker/screens/home/badge_details.dart';
+import 'package:scout_tracker/screens/home/profile.dart';
 
 enum BadgeList { all, inprogress, earned, unearned }
 
@@ -226,7 +229,7 @@ class _BadgesState extends State<Badges> {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white24,
           borderRadius: BorderRadius.circular(30),
@@ -234,15 +237,18 @@ class _BadgesState extends State<Badges> {
           //     topRight: Radius.circular(50),
           //     topLeft: Radius.circular(50)),
         ),
-        child: GridView.count(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          crossAxisCount: 3,
-          children: badgeSearchList.map((badgeName) {
-            return Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: GridView.count(
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            crossAxisCount: 3,
+            scrollDirection: Axis.vertical,
+            childAspectRatio: 0.85,
+            children: badgeSearchList.map((badgeName) {
+              return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -258,42 +264,74 @@ class _BadgesState extends State<Badges> {
                     )
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: SvgPicture.asset(
-                        'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
-                        placeholderBuilder: (context) => Center(
-                          child: SpinKitDoubleBounce(
-                            color: Colors.redAccent[100],
-                          ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: Material(
+                    child: InkWell(
+                      splashColor: Colors.redAccent[100],
+                      highlightColor: Colors.grey.withOpacity(0.15),
+                      // When the user taps the button, show a snackbar.
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BadgeDetails(
+                                      badgeName: badgeName,
+                                    )));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Hero(
+                              tag: badgeName,
+                              child: SvgPicture.asset(
+                                'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
+                                height: 70,
+                                placeholderBuilder: (context) => Center(
+                                  child: SpinKitDoubleBounce(
+                                    color: Colors.redAccent[100],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: AutoSizeText(
+                                  badgeName,
+                                  maxLines: 2,
+                                  wrapWords: false,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            LinearPercentIndicator(
+                              percent: 0.6,
+                              lineHeight: 10,
+                              linearGradient: new LinearGradient(
+                                colors: [
+                                  Colors.amber[200],
+                                  Colors.redAccent,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              backgroundColor: Colors.grey[200],
+                              clipLinearGradient: true,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    Text(
-                      badgeName,
-                    ),
-                    SizedBox(height: 4),
-                    LinearPercentIndicator(
-                      percent: 0.6,
-                      lineHeight: 10,
-                      linearGradient: new LinearGradient(
-                        colors: [
-                          Colors.amber[200],
-                          Colors.redAccent,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      backgroundColor: Colors.grey[200],
-                      clipLinearGradient: true,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

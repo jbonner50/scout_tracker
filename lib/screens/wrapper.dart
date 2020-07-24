@@ -15,15 +15,12 @@ class _WrapperState extends State<Wrapper> {
 
   @override
   Widget build(BuildContext context) {
-    _body = backgroundGradient(context);
-
     final String uid = Provider.of<String>(context);
+    _body = backgroundGradient(context);
 
     if (uid == null) {
       setState(() => _body = Landing());
-    } else if (uid == 'loading') {
-      setState(() => _body = backgroundGradient(context));
-    } else {
+    } else if (uid != 'loading') {
       setState(() => _body = Home());
     }
     //loading = not received; null = no user; full uid = signed in

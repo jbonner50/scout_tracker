@@ -1,5 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// class Date {
+//   Date({this.month, this.day, this.year});
+//   final int month;
+//   final int day;
+//   final int year;
+
+//   String format() => '$month/$day/$year';
+
+//   factory Date.currentDate() {
+//     DateTime current = DateTime.now();
+//     return Date(
+//       month: current.month,
+//       day: current.day,
+//       year: current.year,
+//     );
+//   }
+// }
+
 class DatabaseService {
   final String uid;
   DatabaseService({this.uid});
@@ -12,10 +30,11 @@ class DatabaseService {
     return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
-    }).then((_) => scoutCollection.document(uid).collection('advancement')
-      ..document('rank')
-      ..document('meritbadge')
-      ..document('profile'));
+    }).then((_) => scoutCollection.document(uid)
+      ..collection('badges')
+      ..collection('ranks'));
+
+    //TODO create all badge and rank progress documents inside ranks and badges collections using BATCH for firestore
   }
 
 //   //brew list from snapshot
