@@ -159,23 +159,23 @@ class _BadgesState extends State<Badges> {
   ];
 
   static List<String> eagleBadges = [
-    'First Aid',
+    'Camping',
     'Citizenship in the Community',
     'Citizenship in the Nation',
     'Citizenship in the World',
     'Communication',
     'Cooking',
-    'Personal Fitness',
-    'Emergency Preparedness',
-    'Lifesaving',
-    'Environmental Science',
-    'Sustainability',
-    'Personal Management',
-    'Swimming',
-    'Hiking',
     'Cycling',
-    'Camping',
+    'Emergency Preparedness',
+    'Environmental Science',
     'Family Life',
+    'First Aid',
+    'Hiking',
+    'Lifesaving',
+    'Personal Fitness',
+    'Personal Management',
+    'Sustainability',
+    'Swimming',
   ];
 
   List<String> badgeSearchList = List.from(badges);
@@ -213,16 +213,89 @@ class _BadgesState extends State<Badges> {
     ),
   };
 
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  Widget _buildBadgeTile(String badgeName) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4, // soften the shadow
+            spreadRadius: 1, //extend the shadow
+            offset: Offset(
+              0, // Move to right 10  horizontally
+              2, // Move to bottom 10 Vertically
+            ),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Material(
+          child: InkWell(
+            splashColor: Colors.redAccent[100],
+            highlightColor: Colors.grey.withOpacity(0.15),
+            // When the user taps the button, show a snackbar.
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BadgeDetails(
+                            badgeName: badgeName,
+                          )));
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: badgeName,
+                    child: SvgPicture.asset(
+                      'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
+                      height: 70,
+                      placeholderBuilder: (context) => Center(
+                        child: SpinKitDoubleBounce(
+                          color: Colors.redAccent[100],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: AutoSizeText(
+                        badgeName,
+                        maxLines: 2,
+                        wrapWords: false,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  LinearPercentIndicator(
+                    percent: 0.6,
+                    lineHeight: 10,
+                    linearGradient: new LinearGradient(
+                      colors: [
+                        Colors.amber[200],
+                        Colors.redAccent,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    backgroundColor: Colors.grey[200],
+                    clipLinearGradient: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildBadges({BadgeList type}) {
@@ -248,93 +321,24 @@ class _BadgesState extends State<Badges> {
             scrollDirection: Axis.vertical,
             childAspectRatio: 0.85,
             children: badgeSearchList.map((badgeName) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4, // soften the shadow
-                      spreadRadius: 1, //extend the shadow
-                      offset: Offset(
-                        0, // Move to right 10  horizontally
-                        2, // Move to bottom 10 Vertically
-                      ),
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: Material(
-                    child: InkWell(
-                      splashColor: Colors.redAccent[100],
-                      highlightColor: Colors.grey.withOpacity(0.15),
-                      // When the user taps the button, show a snackbar.
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BadgeDetails(
-                                      badgeName: badgeName,
-                                    )));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Hero(
-                              tag: badgeName,
-                              child: SvgPicture.asset(
-                                'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
-                                height: 70,
-                                placeholderBuilder: (context) => Center(
-                                  child: SpinKitDoubleBounce(
-                                    color: Colors.redAccent[100],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: AutoSizeText(
-                                  badgeName,
-                                  maxLines: 2,
-                                  wrapWords: false,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            LinearPercentIndicator(
-                              percent: 0.6,
-                              lineHeight: 10,
-                              linearGradient: new LinearGradient(
-                                colors: [
-                                  Colors.amber[200],
-                                  Colors.redAccent,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              backgroundColor: Colors.grey[200],
-                              clipLinearGradient: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
+              return _buildBadgeTile(badgeName);
             }).toList(),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override

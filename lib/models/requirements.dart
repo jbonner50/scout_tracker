@@ -16,7 +16,7 @@ class RequirementList {
       this.numChildren = template["root"].length;
       this.numChildrenRequired = this.numChildren;
       this.numChildrenComplete = 0;
-      template = template["root"][1];
+      template = template["root"];
     } else {
       this.numChildren = template.length;
       this.numChildrenRequired = childrenRequired;
@@ -32,7 +32,7 @@ class RequirementList {
           subReqs: value is List
               ? RequirementList.fromTemplate(value[2],
                   childrenRequired: value[1])
-              : [],
+              : null,
         ),
       );
     });
@@ -40,22 +40,25 @@ class RequirementList {
   }
 
   //convert reqList to a map for firestore (recursive)
-  Map<String, dynamic> convertReqListToFirestore(List<Requirement> reqs) {
+  Map<String, dynamic> convertReqListToFirestore(RequirementList reqs) {
     Map<String, dynamic> firestoreData = {};
-    reqs.forEach((req) => firestoreData.addAll({
+
+    reqs.reqList.forEach((req) => firestoreData.addAll({
           req.id: {
             'initials': req.initials,
             'date': req.date,
-            'subReqs': convertReqListToFirestore(req.subReqs),
+            'subReqs': req.subReqs == null
+                ? null
+                : convertReqListToFirestore(req.subReqs),
           }
         }));
+
     return firestoreData;
   }
 
   //create/update Firestore map from reqList
   Future<void> updateRequirementListDocument(DocumentReference doc) {
-    Map<String, dynamic> firestoreData =
-        convertReqListToFirestore(this.reqList);
+    Map<String, dynamic> firestoreData = convertReqListToFirestore(this);
 
     return doc.setData(firestoreData);
   }
@@ -71,7 +74,7 @@ class RequirementList {
             isCheckable: !(value is List),
             description: value is List ? value[0] : value,
             subReqs:
-                value is List ? RequirementList.fromTemplate(value[1]) : [],
+                value is List ? RequirementList.fromTemplate(value[1]) : null,
           ),
         ));
     reqs.forEach((req) {
@@ -99,6 +102,6 @@ class Requirement {
   bool isComplete;
   String initials;
   String description;
-  List<Requirement> subReqs;
+  RequirementList subReqs;
   String date;
 }

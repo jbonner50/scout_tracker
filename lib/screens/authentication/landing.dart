@@ -35,92 +35,7 @@ class _LandingState extends State<Landing> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        height: 280,
-                        width: MediaQuery.of(context).size.width,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              child: circle(120, 120, Colors.orange[700]),
-                              top: -40,
-                              left: -40,
-                            ),
-                            Positioned(
-                              child: circle(100, 100, Colors.orange),
-                              top: -30,
-                              left: -30,
-                            ),
-                            Positioned(
-                              top: 30,
-                              left: 290,
-                              height: 60,
-                              child: Image.asset(
-                                'assets/images/cloud.png',
-                                color: Colors.white,
-                              ),
-                            ),
-                            Positioned(
-                              top: 55,
-                              left: 200,
-                              height: 60,
-                              child: Transform(
-                                transform: Matrix4.rotationY(math.pi),
-                                child: Image.asset(
-                                  'assets/images/cloud.png',
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 370,
-                              top: 60,
-                              height: 200,
-                              child: Image.asset(
-                                'assets/images/tree.png',
-                              ),
-                            ),
-                            Positioned(
-                              top: 97,
-                              left: 410,
-                              height: 40,
-                              child: Transform(
-                                transform: Matrix4.rotationY(math.pi),
-                                child: Image.asset(
-                                  'assets/images/bird.png',
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 110,
-                              top: 50,
-                              width: 250,
-                              child: Image.asset(
-                                'assets/images/scout.png',
-                              ),
-                            ),
-                            Positioned(
-                              left: 145,
-                              top: 102,
-                              height: 200,
-                              child: Transform(
-                                transform: Matrix4.rotationY(math.pi),
-                                child: Image.asset(
-                                  'assets/images/tent.png',
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 320,
-                              top: 164,
-                              height: 100,
-                              child: Image.asset(
-                                'assets/images/campfire.png',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
+                      _buildScoutPicture(),
                       Text(
                         'Scout Tracker',
                         style: TextStyle(
@@ -129,7 +44,6 @@ class _LandingState extends State<Landing> {
                             letterSpacing: 1,
                             color: Colors.white),
                       ),
-
                       SizedBox(height: 15),
                       _buildTabBar(),
                       SizedBox(height: 5),
@@ -142,6 +56,94 @@ class _LandingState extends State<Landing> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildScoutPicture() {
+    return Container(
+      height: 280,
+      width: MediaQuery.of(context).size.width,
+      child: Stack(
+        children: [
+          Positioned(
+            child: circle(120, 120, Colors.orange[700]),
+            top: -40,
+            left: -40,
+          ),
+          Positioned(
+            child: circle(100, 100, Colors.orange),
+            top: -30,
+            left: -30,
+          ),
+          Positioned(
+            top: 30,
+            left: 290,
+            height: 60,
+            child: Image.asset(
+              'assets/images/cloud.png',
+              color: Colors.white,
+            ),
+          ),
+          Positioned(
+            top: 55,
+            left: 200,
+            height: 60,
+            child: Transform(
+              transform: Matrix4.rotationY(math.pi),
+              child: Image.asset(
+                'assets/images/cloud.png',
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 370,
+            top: 60,
+            height: 200,
+            child: Image.asset(
+              'assets/images/tree.png',
+            ),
+          ),
+          Positioned(
+            top: 97,
+            left: 410,
+            height: 40,
+            child: Transform(
+              transform: Matrix4.rotationY(math.pi),
+              child: Image.asset(
+                'assets/images/bird.png',
+              ),
+            ),
+          ),
+          Positioned(
+            left: 110,
+            top: 50,
+            width: 250,
+            child: Image.asset(
+              'assets/images/scout.png',
+            ),
+          ),
+          Positioned(
+            left: 145,
+            top: 102,
+            height: 200,
+            child: Transform(
+              transform: Matrix4.rotationY(math.pi),
+              child: Image.asset(
+                'assets/images/tent.png',
+              ),
+            ),
+          ),
+          Positioned(
+            left: 320,
+            top: 164,
+            height: 100,
+            child: Image.asset(
+              'assets/images/campfire.png',
+            ),
+          ),
+        ],
       ),
     );
   }

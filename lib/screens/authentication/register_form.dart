@@ -15,7 +15,7 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _obscurePasswordLogin = true;
 
   bool _autoValidateEmail = false;
-  bool _autoovalidatePassword = false;
+  bool _autovalidatePassword = false;
 
   bool _isLoading = false;
 
@@ -104,7 +104,7 @@ class _RegisterFormState extends State<RegisterForm> {
               _registerFormKey.currentState.save();
               print(_email);
               print(_pass);
-              print(_rank);
+              print('$_rank');
               setState(() => _isLoading = true);
               dynamic result = await AuthService()
                   .register(email: _email, pass: _pass, rank: _rank);
@@ -113,7 +113,7 @@ class _RegisterFormState extends State<RegisterForm> {
               print('invalid');
               setState(() {
                 _autoValidateEmail = true;
-                _autoovalidatePassword = true;
+                _autovalidatePassword = true;
               });
             }
           },
@@ -134,6 +134,87 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextFormField(
+      autovalidate: _autoValidateEmail,
+      validator: (email) =>
+          EmailValidator.validate(email) ? null : "Invalid email address",
+      onSaved: (email) => _email = email,
+      keyboardType: TextInputType.emailAddress,
+      style: TextStyle(fontSize: 20, color: Colors.black),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        icon: Icon(
+          Icons.mail,
+          color: Colors.black,
+        ),
+        hintText: "Email Address",
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      autovalidate: _autovalidatePassword,
+      validator: (password) {
+        Pattern pattern = r'^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,}$';
+        RegExp regex = new RegExp(pattern);
+        if (!regex.hasMatch(password))
+          return 'Password must container letters, numbers and >6 characters';
+        else
+          return null;
+      },
+      onSaved: (password) => _pass = password,
+      style: TextStyle(fontSize: 20, color: Colors.black),
+      obscureText: _obscurePasswordLogin,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        icon: Icon(
+          Icons.vpn_key,
+          color: Colors.black,
+        ),
+        hintText: "Password",
+        suffixIcon: IconButton(
+          icon: Icon(
+            // Based on passwordVisible state choose the icon
+            _obscurePasswordLogin ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            // Update the state i.e. toogle the state of passwordVisible variable
+            setState(() {
+              _obscurePasswordLogin = !_obscurePasswordLogin;
+            });
+            HapticFeedback.selectionClick();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRankField() {
+    return Row(
+      children: [
+        rankIcons[_rank],
+        Expanded(
+          child: Slider(
+            value: _rank.toDouble(),
+            onChanged: (newRank) {
+              setState(() => _rank = newRank.toInt());
+              HapticFeedback.selectionClick();
+            },
+            inactiveColor: Colors.grey[200],
+            activeColor: Colors.redAccent,
+            divisions: 6,
+            min: 0,
+            max: 6,
+            label: '${ranks[_rank]}',
+          ),
+        ),
+      ],
     );
   }
 
@@ -165,92 +246,19 @@ class _RegisterFormState extends State<RegisterForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextFormField(
-                  autovalidate: _autoValidateEmail,
-                  validator: (email) => EmailValidator.validate(email)
-                      ? null
-                      : "Invalid email address",
-                  onSaved: (email) => _email = email,
-                  keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(fontSize: 20, color: Colors.black),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(
-                      Icons.mail,
-                      color: Colors.black,
-                    ),
-                    hintText: "Email Address",
-                  ),
-                ),
+                _buildEmailField(),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
                   height: 1,
                   color: Colors.grey[400],
                 ),
-                TextFormField(
-                  autovalidate: _autoovalidatePassword,
-                  validator: (password) {
-                    Pattern pattern =
-                        r'^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,}$';
-                    RegExp regex = new RegExp(pattern);
-                    if (!regex.hasMatch(password))
-                      return 'Password must container letters, numbers and >6 characters';
-                    else
-                      return null;
-                  },
-                  onSaved: (password) => _pass = password,
-                  style: TextStyle(fontSize: 20, color: Colors.black),
-                  obscureText: _obscurePasswordLogin,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(
-                      Icons.vpn_key,
-                      color: Colors.black,
-                    ),
-                    hintText: "Password",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        // Based on passwordVisible state choose the icon
-                        _obscurePasswordLogin
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        // Update the state i.e. toogle the state of passwordVisible variable
-                        setState(() {
-                          _obscurePasswordLogin = !_obscurePasswordLogin;
-                        });
-                        HapticFeedback.selectionClick();
-                      },
-                    ),
-                  ),
-                ),
+                _buildPasswordField(),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
                   height: 1,
                   color: Colors.grey[400],
                 ),
-                Row(
-                  children: [
-                    rankIcons[_rank],
-                    Expanded(
-                      child: Slider(
-                        value: _rank.toDouble(),
-                        onChanged: (newRank) {
-                          setState(() => _rank = newRank.toInt());
-                          HapticFeedback.selectionClick();
-                        },
-                        inactiveColor: Colors.grey[200],
-                        activeColor: Colors.redAccent,
-                        divisions: 6,
-                        min: 0,
-                        max: 6,
-                        label: '${ranks[_rank]}',
-                      ),
-                    ),
-                  ],
-                ),
+                _buildRankField(),
                 SizedBox(height: 10),
                 Container(
                   height: 70,
