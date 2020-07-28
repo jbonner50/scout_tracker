@@ -214,45 +214,45 @@ class _BadgesState extends State<Badges> {
   };
 
   Widget _buildBadgeTile(String badgeName) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4, // soften the shadow
-            spreadRadius: 1, //extend the shadow
-            offset: Offset(
-              0, // Move to right 10  horizontally
-              2, // Move to bottom 10 Vertically
-            ),
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Material(
-          child: InkWell(
-            splashColor: Colors.redAccent[100],
-            highlightColor: Colors.grey.withOpacity(0.15),
-            // When the user taps the button, show a snackbar.
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BadgeDetails(
-                            badgeName: badgeName,
-                          )));
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Hero(
-                    tag: badgeName,
-                    child: SvgPicture.asset(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4, // soften the shadow
+              spreadRadius: 1, //extend the shadow
+              offset: Offset(
+                0, // Move to right 10  horizontally
+                2, // Move to bottom 10 Vertically
+              ),
+            )
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Material(
+            child: InkWell(
+              splashColor: Colors.redAccent[100],
+              highlightColor: Colors.grey.withOpacity(0.15),
+              // When the user taps the button, show a snackbar.
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => BadgeDetails(
+                              badgeName: badgeName,
+                            )));
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
                       'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
                       height: 70,
                       placeholderBuilder: (context) => Center(
@@ -261,35 +261,35 @@ class _BadgesState extends State<Badges> {
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: AutoSizeText(
-                        badgeName,
-                        maxLines: 2,
-                        wrapWords: false,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 20),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: AutoSizeText(
+                          badgeName,
+                          maxLines: 2,
+                          wrapWords: false,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 4),
-                  LinearPercentIndicator(
-                    percent: 0.6,
-                    lineHeight: 10,
-                    linearGradient: new LinearGradient(
-                      colors: [
-                        Colors.amber[200],
-                        Colors.redAccent,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                    SizedBox(height: 4),
+                    LinearPercentIndicator(
+                      percent: 0.6,
+                      lineHeight: 10,
+                      linearGradient: new LinearGradient(
+                        colors: [
+                          Colors.amber[200],
+                          Colors.redAccent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      backgroundColor: Colors.grey[200],
+                      clipLinearGradient: true,
                     ),
-                    backgroundColor: Colors.grey[200],
-                    clipLinearGradient: true,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -313,8 +313,8 @@ class _BadgesState extends State<Badges> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(30),
           child: GridView.count(
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            crossAxisSpacing: 0,
+            mainAxisSpacing: 0,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             crossAxisCount: 3,

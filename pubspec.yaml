@@ -33,6 +33,7 @@ dependencies:
   flutter_spinkit: ^4.1.2
   google_nav_bar: ^2.2.0
   percent_indicator: ^2.1.5
+  circular_check_box: ^1.0.2
 
   # Tools
   provider: ^4.1.3

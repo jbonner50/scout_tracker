@@ -31,18 +31,18 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildOverviewCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 8, // soften the shadow
+            blurRadius: 4, // soften the shadow
             spreadRadius: 1, //extend the shadow
             offset: Offset(
               0, // Move to right 10  horizontally
-              3, // Move to bottom 10 Vertically
+              2, // Move to bottom 10 Vertically
             ),
           )
         ],
@@ -162,18 +162,18 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildLeadershipCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 8, // soften the shadow
+            blurRadius: 4, // soften the shadow
             spreadRadius: 1, //extend the shadow
             offset: Offset(
               0, // Move to right 10  horizontally
-              3, // Move to bottom 10 Vertically
+              2, // Move to bottom 10 Vertically
             ),
           )
         ],
@@ -298,18 +298,18 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildCampingCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 8, // soften the shadow
+            blurRadius: 4, // soften the shadow
             spreadRadius: 1, //extend the shadow
             offset: Offset(
               0, // Move to right 10  horizontally
-              3, // Move to bottom 10 Vertically
+              2, // Move to bottom 10 Vertically
             ),
           )
         ],
