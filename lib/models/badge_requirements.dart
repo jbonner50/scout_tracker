@@ -1,28 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class Date {
-  int month;
-  int day;
-  int year;
-
-  Date({this.month, this.day, this.year});
-
-//from string XX/XX/XXXX
-  Date.fromDateFormat(String formatted) {
-    List<String> splitDate = formatted.split('/');
-    this.month = int.parse(splitDate[0]);
-    this.day = int.parse(splitDate[1]);
-    this.year = int.parse(splitDate[2]);
-  }
-
-//to string XX/XX/XXXX
-  @override
-  String toString() {
-    return '${this.month}/${this.day}/${this.year}';
-  }
-}
-
 class BadgeRequirementList {
   List<BadgeRequirement> reqList;
   int numChildren;
@@ -31,7 +9,7 @@ class BadgeRequirementList {
   bool subReqsComplete = false;
   BadgeRequirement parent;
 
-  void updateNumChildrenComplete() {
+  void updateNumSubReqsComplete() {
     int complete = 0;
     this.reqList.forEach((req) {
       print(req.isComplete);
@@ -122,6 +100,7 @@ class BadgeRequirement extends ChangeNotifier {
       this.isComplete = !this.isComplete;
     else
       this.isComplete = newValue;
+    this.parent.updateNumSubReqsComplete();
     notifyListeners();
   }
 

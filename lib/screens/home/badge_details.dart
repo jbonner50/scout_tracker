@@ -40,28 +40,44 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                     ChangeNotifierProvider(
                       create: (context) => req,
                       child: Consumer<BadgeRequirement>(
-                          builder: (context, req, child) {
-                        return CircularCheckBox(
-                            inactiveColor: Colors.redAccent[100],
-                            activeColor: Colors.redAccent[100],
-                            disabledColor: Colors.blue[400],
-                            checkColor: Colors.white,
-                            value: (() {
-                              if (req.isCheckable) {
-                                return req.isComplete;
-                              } else {
-                                print('got here');
-                                return req?.subReqs?.subReqsComplete ?? false;
-                              }
-                            }()),
-                            onChanged: (bool newValue) {
-                              if (req.isCheckable) {
-                                req.setIsComplete(newValue);
-                                req.parent.updateNumChildrenComplete();
-                              }
-                            });
-                      }),
+                        builder: (context, req, child) {
+                          if (req.isCheckable) {
+                            return CircularCheckBox(
+                              inactiveColor: Colors.redAccent[100],
+                              activeColor: Colors.greenAccent,
+                              checkColor: Colors.white,
+                              value: req.isComplete,
+                              onChanged: (bool newValue) =>
+                                  req.setIsComplete(newValue),
+                            );
+                          } else {
+                            return Container(
+                              margin: EdgeInsets.only(left: 5, right: 5),
+                              constraints: BoxConstraints(minWidth: 60),
+                              height: 50,
+                              child: FilterChip(
+                                pressElevation: 0,
+                                checkmarkColor: Colors.white,
+                                backgroundColor: Colors.redAccent[100],
+                                selectedColor: Colors.greenAccent,
+                                onSelected: (_) {},
+                                selected:
+                                    req?.subReqs?.subReqsComplete ?? false,
+                                label: Text(
+                                  '${req.subReqs.numChildrenComplete} / ${req.subReqs.numChildrenRequired}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
+
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
@@ -143,16 +159,37 @@ class _BadgeDetailsState extends State<BadgeDetails> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                    child: Row(
+                      children: [
+                        MaterialButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(10),
+                          color: Colors.white24,
+                          elevation: 0,
+                          highlightElevation: 0,
+                          splashColor: Colors.redAccent[100],
+                          highlightColor: Colors.transparent,
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      )
-                    ],
+                        SizedBox(width: 10),
+                        Text(
+                          widget.badgeName,
+                          style: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   FutureBuilder(
                     future: DefaultAssetBundle.of(context)

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -18,182 +20,48 @@ class Badges extends StatefulWidget {
 class _BadgesState extends State<Badges> {
   TextEditingController _searchController;
 
-  static List<String> badges = [
-    'American Business',
-    'American Cultures',
-    'American Heritage',
-    'American Labor',
-    'Animal Science',
-    'Animation',
-    'Archaeology',
-    'Archery',
-    'Architecture',
-    'Art',
-    'Astronomy',
-    'Athletics',
-    'Automotive Maintenance',
-    'Aviation',
-    'Backpacking',
-    'Basketry',
-    'Bird Study',
-    'Bugling',
-    'Camping',
-    'Canoeing',
-    'Chemistry',
-    'Chess',
-    'Citizenship in the Community',
-    'Citizenship in the Nation',
-    'Citizenship in the World',
-    'Climbing',
-    'Coin Collecting',
-    'Collections',
-    'Communication',
-    'Composite Materials',
-    'Cooking',
-    'Crime Prevention',
-    'Cycling',
-    'Dentistry',
-    'Digital Technology',
-    'Disabilities Awareness',
-    'Dog Care',
-    'Drafting',
-    'Electricity',
-    'Electronics',
-    'Emergency Preparedness',
-    'Energy',
-    'Engineering',
-    'Entrepreneurship',
-    'Environmental Science',
-    'Exploration',
-    'Family Life',
-    'Farm Mechanics',
-    'Fingerprinting',
-    'Fire Safety',
-    'First Aid',
-    'Fish & Wildlife Management',
-    'Fishing',
-    'Fly Fishing',
-    'Forestry',
-    'Game Design',
-    'Gardening',
-    'Genealogy',
-    'Geocaching',
-    'Geology',
-    'Golf',
-    'Graphic Arts',
-    'Hiking',
-    'Home Repairs',
-    'Horsemanship',
-    'Indian Lore',
-    'Insect Study',
-    'Inventing',
-    'Journalism',
-    'Kayaking',
-    'Landscape Architecture',
-    'Law',
-    'Leatherwork',
-    'Lifesaving',
-    'Mammal Study',
-    'Medicine',
-    'Metalwork',
-    'Mining in Society',
-    'Model Design and Building',
-    'Motorboating',
-    'Moviemaking',
-    'Music',
-    'Nature',
-    'Nuclear Science',
-    'Oceanography',
-    'Orienteering',
-    'Painting',
-    'Personal Fitness',
-    'Personal Management',
-    'Pets',
-    'Photography',
-    'Pioneering',
-    'Plant Science',
-    'Plumbing',
-    'Pottery',
-    'Programming',
-    'Public Health',
-    'Public Speaking',
-    'Pulp and Paper',
-    'Radio',
-    'Railroading',
-    'Reading',
-    'Reptile and Amphibian Study',
-    'Rifle Shooting',
-    'Robotics',
-    'Rowing',
-    'Safety',
-    'Salesmanship',
-    'Scholarship',
-    'Scouting Heritage',
-    'Scuba Diving',
-    'Sculpture',
-    'Search and Rescue',
-    'Shotgun Shooting',
-    'Signs, Signals, and Codes',
-    'Skating',
-    'Small-Boat Sailing',
-    'Snow Sports',
-    'Soil and Water Conservation',
-    'Space Exploration',
-    'Sports',
-    'Stamp Collecting',
-    'Surveying',
-    'Sustainability',
-    'Swimming',
-    'Textile',
-    'Theater',
-    'Traffic Safety',
-    'Truck Transportation',
-    'Veterinary Medicine',
-    'Water Sports',
-    'Weather',
-    'Welding',
-    'Whitewater',
-    'Wilderness Survival',
-    'Wood Carving',
-    'Woodwork',
-  ];
+  List<String> badgeList = [];
 
-  static List<String> eagleBadges = [
-    'Camping',
-    'Citizenship in the Community',
-    'Citizenship in the Nation',
-    'Citizenship in the World',
-    'Communication',
-    'Cooking',
-    'Cycling',
-    'Emergency Preparedness',
-    'Environmental Science',
-    'Family Life',
-    'First Aid',
-    'Hiking',
-    'Lifesaving',
-    'Personal Fitness',
-    'Personal Management',
-    'Sustainability',
-    'Swimming',
-  ];
+  List<String> eagleList = [];
 
-  List<String> badgeSearchList = List.from(badges);
+  List<String> badgeSearchList = [];
+  bool eagleOnly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _getBadgeLists().then((result) => setState(() => badgeSearchList = result));
+    // _searchController.addListener(() => onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future _getBadgeLists() async {
+    String text =
+        await DefaultAssetBundle.of(context).loadString('data/badge_list.txt');
+
+    badgeList = LineSplitter().convert(text);
+    // badgeSearchList = List.from(badgeList);
+    text =
+        await DefaultAssetBundle.of(context).loadString('data/eagle_list.txt');
+    eagleList = LineSplitter().convert(text);
+    badgeSearchList = List.from(badgeList);
+    return badgeSearchList;
+  }
 
   onSearchChanged(String query) {
     setState(() {
-      badgeSearchList = badges
+      badgeSearchList = (eagleOnly ? eagleList : badgeList)
           .where((string) => string.toLowerCase().contains(query.toLowerCase()))
           .toList();
-      if (eagleOnly) {
-        badgeSearchList = badgeSearchList
-            .where((element) => eagleBadges.contains(element))
-            .toList();
-      }
     });
   }
 
-  bool eagleOnly = false;
   Map<String, Widget> indicators = {
     'all': Icon(
       Icons.all_inclusive,
@@ -252,15 +120,12 @@ class _BadgesState extends State<Badges> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SvgPicture.asset(
-                      'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
-                      height: 70,
-                      placeholderBuilder: (context) => Center(
-                        child: SpinKitDoubleBounce(
-                          color: Colors.redAccent[100],
-                        ),
-                      ),
-                    ),
+                    Image.asset(
+                        'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                        height: 70, errorBuilder: (context, error, stackTrace) {
+                      print(error.toString());
+                      return Icon(Icons.not_interested, size: 50);
+                    }),
                     Expanded(
                       child: Align(
                         alignment: Alignment.center,
@@ -320,25 +185,13 @@ class _BadgesState extends State<Badges> {
             crossAxisCount: 3,
             scrollDirection: Axis.vertical,
             childAspectRatio: 0.85,
-            children: badgeSearchList.map((badgeName) {
+            children: badgeSearchList.map<Widget>((badgeName) {
               return _buildBadgeTile(badgeName);
             }).toList(),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -364,45 +217,54 @@ class _BadgesState extends State<Badges> {
                   centerTitle: true,
                   background: Container(
                     padding: EdgeInsets.fromLTRB(24, 8, 16, 0),
+                    alignment: Alignment.topCenter,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadiusDirectional.circular(30),
                     ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: onSearchChanged,
-                      style: TextStyle(fontSize: 25, color: Colors.black),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Search Badges",
-                        suffixIcon: Row(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: onSearchChanged,
+                            style: TextStyle(fontSize: 25, color: Colors.black),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Search Badges",
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  _searchController.clear();
+                                  onSearchChanged("");
+                                },
+                                icon: Icon(Icons.clear, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Column(
                           mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                _searchController.clear();
-                                onSearchChanged("");
-                              },
-                              icon: Icon(Icons.clear, color: Colors.black),
+                            Text(
+                              'Eagle',
+                              style: TextStyle(fontFamily: 'ProductSans'),
                             ),
-                            FilterChip(
-                              label: Text('Eagle Only',
-                                  style: TextStyle(fontFamily: 'ProductSans')),
-                              labelStyle: TextStyle(color: Colors.white),
-                              selected: eagleOnly,
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  eagleOnly = !eagleOnly;
-                                });
-                                onSearchChanged(_searchController.text);
-                              },
-                              backgroundColor: Colors.grey[400],
-                              selectedColor: Colors.redAccent[100],
-                              checkmarkColor: Colors.white,
-                            ),
+                            Text('Only',
+                                style: TextStyle(fontFamily: 'ProductSans')),
                           ],
                         ),
-                      ),
+                        Switch(
+                          activeColor: Colors.redAccent[100],
+                          value: eagleOnly,
+                          onChanged: (bool selected) {
+                            setState(() {
+                              eagleOnly = !eagleOnly;
+                            });
+                            onSearchChanged(_searchController.text);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
