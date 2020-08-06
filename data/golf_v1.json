@@ -2,12 +2,12 @@
   "root": {
     "1": "Discuss safety on the golf course. Show that you know first aid for injuries or illnesses that could occur while golfing, including lightning, heat reactions, dehydration, blisters, sprains, and strains.",
     "2": [
-      "Study the USGA “Rules of Golf” now in use.",
+      "Study the USGA \"Rules of Golf\" now in use.",
       3,
       {
         "a": "Tell about the three categories of golf etiquette.",
         "b": "Demonstrate that you understand the definitions of golf terms.",
-        "c": "Show that you understand the “Rules of Amateur Status."
+        "c": "Show that you understand the \"Rules of Amateur Status.\""
       }
     ],
     "3": "Tell about your understanding of the USGA system of handicapping.",
@@ -47,7 +47,7 @@
       "Play a minimum of two nine-hole rounds or one 18-hole round of golf with another golfer about your age and with your counselor",
       3,
       {
-        "a": "Follow the “Rules of Golf.”",
+        "a": "Follow the \"Rules of Golf.\"",
         "b": "Practice good golf etiquette.",
         "c": "Show respect to fellow golfers, committee, sponsor, and gallery"
       }

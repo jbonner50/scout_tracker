@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 
 class BadgeRequirementList {
   List<BadgeRequirement> reqList;
-  int numChildren;
-  int numChildrenRequired;
-  int numChildrenComplete;
+  String note;
+  int numChildren = 0;
+  int numChildrenRequired = 0;
+  int numChildrenComplete = 0;
   bool subReqsComplete = false;
   BadgeRequirement parent;
 
   void updateNumSubReqsComplete() {
     int complete = 0;
     this.reqList.forEach((req) {
-      print(req.isComplete);
       if (req.isComplete) complete++;
     });
     this.numChildrenComplete = complete;
@@ -22,69 +22,85 @@ class BadgeRequirementList {
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  //create/update Firestore map from reqList
-  Future<void> updateRequirementListDocument(DocumentReference doc) {
-    Map<String, dynamic> firestoreData = convertReqListToFirestore(this);
-
-    return doc.setData(firestoreData);
-  }
-
-  //create reqList from json template
-  BadgeRequirementList.fromJson(Map<String, dynamic> template,
-      {int childrenRequired, BadgeRequirement parent}) {
-    List<BadgeRequirement> reqs = [];
-
-    if (template.containsKey("root")) {
-      this.numChildren = template["root"].length;
-      this.numChildrenRequired = this.numChildren;
-      this.numChildrenComplete = 0;
-      template = template["root"];
-    } else {
-      this.numChildren = template.length;
-      this.numChildrenRequired = childrenRequired;
-      this.numChildrenComplete = 0;
-    }
-
-    template.forEach((key, value) {
-      reqs.add(
-        BadgeRequirement.fromJson(key: key, value: value, parent: this),
-      );
-    });
-    this.parent = parent;
-    this.reqList = reqs;
-    this.numChildrenRequired = reqList.length;
-  }
-
   // convert reqList to a map for firestore (recursive)
-  Map<String, dynamic> convertReqListToFirestore(BadgeRequirementList reqs) {
+  Map<String, dynamic> convertReqListToFirestore() {
     Map<String, dynamic> firestoreData = {};
 
-    reqs.reqList.forEach((req) => firestoreData.addAll({
+    this.reqList.forEach((req) => firestoreData.addAll({
           req.id: {
-            'isComplete': req.isComplete,
-            'subReqs': req.subReqs == null
-                ? null
-                : convertReqListToFirestore(req.subReqs),
+            'is_complete': req.isComplete,
+            'sub_reqs': req.subReqs?.convertReqListToFirestore(),
           }
         }));
 
     return firestoreData;
   }
 
-//get reqList from firestoreData/template
-  BadgeRequirementList.fromFirestore(
-      DocumentSnapshot snapshot, Map<String, dynamic> template) {
-    List<BadgeRequirement> reqs = [];
-    //copy data from template
-    template.forEach((key, value) => reqs
-        .add(BadgeRequirement.fromJson(key: key, value: value, parent: this)));
-    reqs.forEach((req) {
-      req.isComplete = snapshot.data[req.id]['isComplete'];
+  //create reqList from json template
+  BadgeRequirementList.fromJsonMain(Map<String, dynamic> templateMap) {
+    this.numChildren = templateMap["root"].length;
+    this.numChildrenRequired = templateMap["root"].length;
+    this.numChildrenComplete = 0;
+    this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
+
+    this.reqList = templateMap["root"]
+        .map<BadgeRequirement>(
+            (req) => BadgeRequirement.fromJson(req: req, parent: this))
+        .toList();
+  }
+
+  BadgeRequirementList.fromJsonSub(List templateList,
+      {int childrenRequired, BadgeRequirement parent}) {
+    this.numChildren = templateList.length;
+    this.numChildrenRequired = childrenRequired;
+    this.numChildrenComplete = 0;
+
+    this.reqList = templateList
+        .map<BadgeRequirement>(
+            (req) => BadgeRequirement.fromJson(req: req, parent: this))
+        .toList();
+
+    this.parent = parent;
+  }
+
+  BadgeRequirementList.fromFirestoreMain(
+      Map<String, dynamic> templateMap, Map<String, dynamic> firestoreData) {
+    this.numChildren = templateMap["root"].length;
+    this.numChildrenRequired = templateMap["root"].length;
+    this.numChildrenComplete = 0;
+    this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
+
+    firestoreData.forEach((key, value) {
+      if (value['isComplete']) this.numChildrenComplete++;
     });
 
-    this.reqList = reqs;
-    //update firebase document for badge progress with local object
+    this.reqList = templateMap["root"]
+        .map<BadgeRequirement>(
+          (req) => BadgeRequirement.fromFirestore(
+              req: req, firestoreData: firestoreData[req["req"]], parent: this),
+        )
+        .toList();
+    this.parent = parent;
   }
+
+  BadgeRequirementList.fromFirestoreSub(List templateReqs,
+      {int childrenRequired,
+      BadgeRequirement parent,
+      Map<String, dynamic> firestoreData}) {
+    this.numChildren = templateReqs.length;
+    this.numChildrenRequired = childrenRequired;
+
+    firestoreData.forEach((key, value) {
+      if (value['isComplete']) this.numChildrenComplete++;
+    });
+
+    this.reqList = templateReqs
+        .map<BadgeRequirement>((req) => BadgeRequirement.fromFirestore(
+            req: req, firestoreData: firestoreData[req["req"]], parent: this))
+        .toList();
+    this.parent = parent;
+  }
+//get reqList from firestoreData/template
 }
 
 class BadgeRequirement extends ChangeNotifier {
@@ -96,7 +112,7 @@ class BadgeRequirement extends ChangeNotifier {
   BadgeRequirementList parent;
 
   void setIsComplete([bool newValue]) {
-    if (newValue != null)
+    if (newValue == null)
       this.isComplete = !this.isComplete;
     else
       this.isComplete = newValue;
@@ -113,16 +129,32 @@ class BadgeRequirement extends ChangeNotifier {
   //   this.parent,
   // });
 
-  BadgeRequirement.fromJson(
-      {String key, dynamic value, BadgeRequirementList parent}) {
-    this.id = key;
-    this.isCheckable = !(value is List);
+  BadgeRequirement.fromJson({Map req, BadgeRequirementList parent}) {
+    this.id = req["req"];
+    this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = false;
-    this.description = value is List ? value[0] : value;
-    this.subReqs = value is List
-        ? BadgeRequirementList.fromJson(value[2],
-            childrenRequired: value[1], parent: this)
-        : null;
+    this.description = req["text"];
+    this.subReqs = req["sub_reqs"].length == 0
+        ? null
+        : BadgeRequirementList.fromJsonSub(req["sub_reqs"],
+            childrenRequired: req["num_reqd"], parent: this);
+    this.parent = parent;
+  }
+
+  BadgeRequirement.fromFirestore(
+      {Map req,
+      Map<String, dynamic> firestoreData,
+      BadgeRequirementList parent}) {
+    this.id = req["req"];
+    this.isCheckable = req["sub_reqs"].length == 0;
+    this.isComplete = firestoreData["is_complete"];
+    this.description = req["text"];
+    this.subReqs = req["sub_reqs"].length == 0
+        ? null
+        : BadgeRequirementList.fromFirestoreSub(req["sub_reqs"],
+            childrenRequired: req["num_reqd"],
+            firestoreData: firestoreData["sub_reqs"],
+            parent: this);
     this.parent = parent;
   }
 }

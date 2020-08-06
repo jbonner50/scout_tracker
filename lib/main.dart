@@ -10,6 +10,7 @@ import 'package:scout_tracker/screens/authentication/landing.dart';
 import 'package:scout_tracker/screens/home/home.dart';
 import 'package:scout_tracker/screens/wrapper.dart';
 import 'package:scout_tracker/services/auth.dart';
+import 'package:scout_tracker/services/storage.dart';
 import 'package:scout_tracker/shared.dart';
 
 void main() {
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    StorageService().saveBadgeJson();
 
     return StreamProvider<String>.value(
       initialData: 'loading',

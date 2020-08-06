@@ -138,21 +138,21 @@ class _BadgesState extends State<Badges> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 4),
-                    LinearPercentIndicator(
-                      percent: 0.6,
-                      lineHeight: 10,
-                      linearGradient: new LinearGradient(
-                        colors: [
-                          Colors.amber[200],
-                          Colors.redAccent,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      backgroundColor: Colors.grey[200],
-                      clipLinearGradient: true,
-                    ),
+                    // SizedBox(height: 4),
+                    // LinearPercentIndicator(
+                    //   percent: 0.6,
+                    //   lineHeight: 10,
+                    //   linearGradient: new LinearGradient(
+                    //     colors: [
+                    //       Colors.amber[200],
+                    //       Colors.redAccent,
+                    //     ],
+                    //     begin: Alignment.topLeft,
+                    //     end: Alignment.bottomRight,
+                    //   ),
+                    //   backgroundColor: Colors.grey[200],
+                    //   clipLinearGradient: true,
+                    // ),
                   ],
                 ),
               ),

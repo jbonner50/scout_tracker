@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:scout_tracker/models/badge_requirements.dart';
+import 'package:scout_tracker/services/storage.dart';
 
 // class Date {
 //   Date({this.month, this.day, this.year});
@@ -30,11 +32,41 @@ class DatabaseService {
     return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
-    }).then((_) => scoutCollection.document(uid)
-      ..collection('badges')
-      ..collection('ranks'));
+    });
+
+    // .then((_) => scoutCollection.document(uid)
+    //   ..collection('badges')
+    //   ..collection('ranks'));
 
     //TODO create all badge and rank progress documents inside ranks and badges collections using BATCH for firestore
+  }
+
+  Future getBadgeData(String hyphenatedBadgeName) async {
+    DocumentSnapshot doc = await scoutCollection
+        .document(uid)
+        .collection('badges')
+        .document(hyphenatedBadgeName)
+        .get();
+    print(doc.exists);
+    Map<String, dynamic> templateData = await StorageService().readBadgeJson();
+    return doc.exists
+        ? BadgeRequirementList.fromFirestoreMain(templateData, doc.data)
+        : BadgeRequirementList.fromJsonMain(templateData);
+  }
+
+  //create/update Firestore map from reqList
+  Future updateRequirementListDocument(
+      BadgeRequirementList badgeRequirementList, String hyphenatedBadgeName) {
+    Map<String, dynamic> firestoreData =
+        badgeRequirementList.convertReqListToFirestore();
+
+    return scoutCollection
+        .document(uid)
+        .collection('badges')
+        .document(hyphenatedBadgeName)
+        .setData(firestoreData);
+
+    // badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''))
   }
 
 //   //brew list from snapshot

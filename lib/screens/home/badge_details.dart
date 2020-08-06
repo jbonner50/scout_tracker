@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:circular_check_box/circular_check_box.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:scout_tracker/models/badge_requirements.dart';
+import 'package:scout_tracker/services/database.dart';
+import 'package:scout_tracker/services/storage.dart';
 
 class BadgeDetails extends StatefulWidget {
   final String badgeName;
@@ -16,10 +19,19 @@ class BadgeDetails extends StatefulWidget {
 }
 
 class _BadgeDetailsState extends State<BadgeDetails> {
+  BadgeRequirementList badgeRequirementList;
+
+  String alphabet = 'abcdefghijklmnopqrstuvwxyz';
   Column _buildBadgeRequirementCards(BadgeRequirementList badgeRequirements,
       [bool test = false]) {
     List<Widget> cards = [];
     badgeRequirements.reqList.forEach((req) {
+      List splitID = req.id.split(".");
+      String newID = "";
+      newID = splitID.length % 2 == 0
+          ? String.fromCharCode(
+              alphabet.codeUnitAt(int.parse(splitID[splitID.length - 1])) - 1)
+          : splitID[splitID.length - 1];
       cards.add(
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,6 +49,17 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                   children: [
                     //checkbox
 
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '$newID.',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     ChangeNotifierProvider(
                       create: (context) => req,
                       child: Consumer<BadgeRequirement>(
@@ -52,8 +75,9 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                             );
                           } else {
                             return Container(
-                              margin: EdgeInsets.only(left: 5, right: 5),
+                              margin: EdgeInsets.only(left: 5),
                               constraints: BoxConstraints(minWidth: 60),
+                              alignment: Alignment.centerLeft,
                               height: 50,
                               child: FilterChip(
                                 pressElevation: 0,
@@ -61,8 +85,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                                 backgroundColor: Colors.redAccent[100],
                                 selectedColor: Colors.greenAccent,
                                 onSelected: (_) {},
-                                selected:
-                                    req?.subReqs?.subReqsComplete ?? false,
+                                selected: req.isComplete,
                                 label: Text(
                                   '${req.subReqs.numChildrenComplete} / ${req.subReqs.numChildrenRequired}',
                                   style: TextStyle(
@@ -75,18 +98,6 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                             );
                           }
                         },
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        '${req.id}.',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
                       ),
                     ),
                     Expanded(
@@ -121,6 +132,8 @@ class _BadgeDetailsState extends State<BadgeDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final String uid = Provider.of<String>(context);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
 
@@ -160,14 +173,13 @@ class _BadgeDetailsState extends State<BadgeDetails> {
               child: Column(
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
                     child: Row(
                       children: [
                         MaterialButton(
                           onPressed: () => Navigator.of(context).pop(),
                           shape: CircleBorder(),
-                          padding: EdgeInsets.all(10),
+                          height: 50,
                           color: Colors.white24,
                           elevation: 0,
                           highlightElevation: 0,
@@ -176,30 +188,58 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                           child: Icon(
                             Icons.arrow_back,
                             color: Colors.white,
-                            size: 40,
+                            size: 35,
                           ),
                         ),
                         SizedBox(width: 10),
                         Text(
                           widget.badgeName,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
+                            letterSpacing: 1,
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                          ),
+                        ),
+                        Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                          child: MaterialButton(
+                            onPressed: () {
+                              DatabaseService(uid: uid)
+                                  .updateRequirementListDocument(
+                                      badgeRequirementList, 'golf');
+                              print('saved reqs');
+                            },
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            height: 50,
+                            color: Colors.white24,
+                            elevation: 0,
+                            highlightElevation: 0,
+                            splashColor: Colors.redAccent[100],
+                            highlightColor: Colors.transparent,
+                            child: Text(
+                              'Save',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   FutureBuilder(
-                    future: DefaultAssetBundle.of(context)
-                        .loadString('data/golf.json'),
+                    future: DatabaseService(uid: uid).getBadgeData('golf'),
+                    // DefaultAssetBundle.of(context)
+                    //     .loadString('data/golf_v1.json'),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        Map<String, dynamic> mappedJson =
-                            json.decode(snapshot.data);
-                        BadgeRequirementList badgeRequirements =
-                            BadgeRequirementList.fromJson(mappedJson);
+                        badgeRequirementList = snapshot.data;
+
                         return Padding(
                           padding: const EdgeInsets.all(8),
                           child: Container(
@@ -211,8 +251,32 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                               //     topRight: Radius.circular(50),
                               //     topLeft: Radius.circular(50)),
                             ),
-                            child:
-                                _buildBadgeRequirementCards(badgeRequirements),
+                            child: Column(
+                              children: [
+                                _buildBadgeRequirementCards(
+                                    badgeRequirementList),
+                                badgeRequirementList.note == null
+                                    ? Container()
+                                    : Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                            color: Colors.white,
+                                          ),
+                                          child: Text(
+                                            badgeRequirementList.note,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                              ],
+                            ),
                           ),
                         );
                       } else {
