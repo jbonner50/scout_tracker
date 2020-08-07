@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:scout_tracker/services/auth.dart';
+import 'package:scout_tracker/services/storage.dart';
 
 class RegisterForm extends StatefulWidget {
   @override
@@ -111,6 +114,18 @@ class _RegisterFormState extends State<RegisterForm> {
                   email: _email,
                   pass: _pass,
                   rank: ranks[_rankNum].toLowerCase().replaceAll(" ", "-"));
+              await DefaultAssetBundle.of(context)
+                  .loadString('data/badge_list.txt')
+                  .then((text) {
+                List badgeNames = LineSplitter().convert(text);
+                try {
+                  StorageService()
+                    ..saveAllBadgesJson(badgeNames)
+                    ..precacheImages(badgeNames, context);
+                } catch (e) {
+                  print(e.toString());
+                }
+              });
               if (result == null) setState(() => _isLoading = false);
             } else {
               print('invalid');
