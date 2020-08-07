@@ -71,7 +71,7 @@ class BadgeRequirementList {
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     firestoreData.forEach((key, value) {
-      if (value['isComplete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenComplete++;
     });
 
     this.reqList = templateMap["root"]
@@ -91,7 +91,7 @@ class BadgeRequirementList {
     this.numChildrenRequired = childrenRequired;
 
     firestoreData.forEach((key, value) {
-      if (value['isComplete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenComplete++;
     });
 
     this.reqList = templateReqs

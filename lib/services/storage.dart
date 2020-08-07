@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart';
-import 'package:scout_tracker/models/badge_requirements.dart';
 
 class StorageService {
   final String uid;
@@ -13,28 +13,33 @@ class StorageService {
   // collection reference
   final StorageReference scoutStorage = FirebaseStorage.instance.ref();
 
-  Future getBadgeJson() async {
+  Future getBadgeJson(String hyphenatedBadgeName) async {
     final StorageReference jsonFile =
-        scoutStorage.child('badges/golf/golf_v1.json');
-
-    String downloadUrl = await jsonFile.getDownloadURL();
-    final Response response = await get(downloadUrl);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      print('Request failed with status: ${response.statusCode}.');
-      return null;
+        scoutStorage.child('badges/$hyphenatedBadgeName-v1.json');
+    try {
+      String downloadUrl = await jsonFile.getDownloadURL();
+      final Response response = await get(downloadUrl);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print(
+            'Request failed with status: ${response.statusCode}. Badge $hyphenatedBadgeName');
+        return null;
+      }
+    } catch (e) {
+      print(e.toString());
     }
   }
 
-  Future<void> saveBadgeJson() async {
-    dynamic badgeData = await getBadgeJson();
+  Future<void> saveBadgeJson(String hyphenatedBadgeName) async {
+    dynamic badgeData = await getBadgeJson(hyphenatedBadgeName);
 
     if (badgeData != null) {
-      final dir = await getApplicationDocumentsDirectory();
-      dir.deleteSync(recursive: true);
+      //TODO add check to see if files exist
+
       final directory = await getApplicationDocumentsDirectory();
-      File badgeFile = File('${directory.path}/badges/golf/golf_v1.json');
+      File badgeFile =
+          File('${directory.path}/badges/$hyphenatedBadgeName.json');
       if (badgeFile.existsSync()) {
         //add new loadout to file
         badgeFile.writeAsString(json.encode(badgeData));
@@ -46,10 +51,49 @@ class StorageService {
     }
   }
 
-  Future readBadgeJson() async {
+  Future<void> saveAllBadgesJson(List badgeNames) async {
+    // final dir = await getApplicationDocumentsDirectory();
+    // dir.deleteSync(recursive: true);
+
+    for (var badgeName in badgeNames) {
+      String hyphenatedBadgeName =
+          badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
+      saveBadgeJson(hyphenatedBadgeName);
+    }
+
+    /*
+    // Create a reference under which you want to list
+var listRef = storageRef.child('files/uid');
+
+// Find all the prefixes and items.
+listRef.listAll().then(function(res) {
+  res.prefixes.forEach(function(folderRef) {
+    // All the prefixes under listRef.
+    // You may call listAll() recursively on them.
+  });
+  res.items.forEach(function(itemRef) {
+    // All the items under listRef.
+  });
+}).catch(function(error) {
+  // Uh-oh, an error occurred!
+});
+*/
+  }
+
+  void precacheImages(List badgeNames, BuildContext context) {
+    for (var badgeName in badgeNames) {
+      String hyphenatedBadgeName =
+          badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
+      precacheImage(
+          AssetImage('assets/images/badges/$hyphenatedBadgeName.png'), context);
+    }
+  }
+
+  Future readBadgeJson(String hyphenatedBadgeName) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      File badgeFile = File('${directory.path}/badges/golf/golf_v1.json');
+      File badgeFile =
+          File('${directory.path}/badges/$hyphenatedBadgeName.json');
       String contents = await badgeFile.readAsString();
       dynamic data = json.decode(contents);
       return data;

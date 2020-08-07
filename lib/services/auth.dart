@@ -21,7 +21,7 @@ class AuthService {
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
 
   Future<AuthResultStatus> register(
-      {String email, String pass, int rank}) async {
+      {String email, String pass, String rank}) async {
     try {
       AuthResult authResult = await _auth.createUserWithEmailAndPassword(
           email: email, password: pass);

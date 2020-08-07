@@ -23,12 +23,15 @@ import 'package:scout_tracker/services/storage.dart';
 class DatabaseService {
   final String uid;
   DatabaseService({this.uid});
+  List<String> inprogress;
+  List<String> earned;
+  List<String> unearned;
 
   // collection reference
   final CollectionReference scoutCollection =
       Firestore.instance.collection('scouts');
 
-  Future createScout(String username, int rank) async {
+  Future createScout(String username, String rank) async {
     return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
@@ -37,8 +40,6 @@ class DatabaseService {
     // .then((_) => scoutCollection.document(uid)
     //   ..collection('badges')
     //   ..collection('ranks'));
-
-    //TODO create all badge and rank progress documents inside ranks and badges collections using BATCH for firestore
   }
 
   Future getBadgeData(String hyphenatedBadgeName) async {
@@ -48,7 +49,8 @@ class DatabaseService {
         .document(hyphenatedBadgeName)
         .get();
     print(doc.exists);
-    Map<String, dynamic> templateData = await StorageService().readBadgeJson();
+    Map<String, dynamic> templateData =
+        await StorageService().readBadgeJson(hyphenatedBadgeName);
     return doc.exists
         ? BadgeRequirementList.fromFirestoreMain(templateData, doc.data)
         : BadgeRequirementList.fromJsonMain(templateData);
@@ -68,6 +70,18 @@ class DatabaseService {
 
     // badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''))
   }
+
+  // //set list of badges based on progress
+  // Future<void> updateBadgeList(String hyphenatedBadgeName, BadgeRequirementList badgeRequirementList) async {
+  //   DocumentReference user = scoutCollection.document(uid);
+  //   if(badgeRequirementList.subReqsComplete) {
+  //     //badge is complete
+  //   user.setData({"badges_in_progress": [...hyphenatedBadgeName]});
+
+  //   } else {
+  //     //badge is in progress
+  //   }
+  // }
 
 //   //brew list from snapshot
 //   List<Brew> _brewListFromSnapshot(QuerySnapshot snapshot) {

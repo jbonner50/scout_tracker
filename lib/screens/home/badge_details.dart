@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:circular_check_box/circular_check_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import 'package:scout_tracker/services/storage.dart';
 
 class BadgeDetails extends StatefulWidget {
   final String badgeName;
-
   BadgeDetails({this.badgeName});
 
   @override
@@ -191,25 +191,43 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                             size: 35,
                           ),
                         ),
+                        Hero(
+                          tag: widget.badgeName
+                              .toLowerCase()
+                              .replaceAll(' ', '-')
+                              .replaceAll(',', ''),
+                          child: Image.asset(
+                              'assets/images/badges/${widget.badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                              height: 60,
+                              errorBuilder: (context, error, stackTrace) {
+                            print(error.toString());
+                            return Icon(Icons.not_interested, size: 50);
+                          }),
+                        ),
                         SizedBox(width: 10),
-                        Text(
-                          widget.badgeName,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            letterSpacing: 1,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        Expanded(
+                          child: AutoSizeText(
+                            widget.badgeName,
+                            maxLines: 1,
+                            style: TextStyle(
+                              letterSpacing: 1,
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        Spacer(),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                           child: MaterialButton(
                             onPressed: () {
                               DatabaseService(uid: uid)
                                   .updateRequirementListDocument(
-                                      badgeRequirementList, 'golf');
+                                      badgeRequirementList,
+                                      widget.badgeName
+                                          .toLowerCase()
+                                          .replaceAll(' ', '-')
+                                          .replaceAll(',', ''));
                               print('saved reqs');
                             },
                             shape: RoundedRectangleBorder(
@@ -233,55 +251,64 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                     ),
                   ),
                   FutureBuilder(
-                    future: DatabaseService(uid: uid).getBadgeData('golf'),
+                    future: DatabaseService(uid: uid).getBadgeData(widget
+                        .badgeName
+                        .toLowerCase()
+                        .replaceAll(' ', '-')
+                        .replaceAll(',', '')),
                     // DefaultAssetBundle.of(context)
                     //     .loadString('data/golf_v1.json'),
                     builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        badgeRequirementList = snapshot.data;
+                      return AnimatedSwitcher(
+                          duration: Duration(milliseconds: 200),
+                          child: (() {
+                            if (snapshot.hasData) {
+                              badgeRequirementList = snapshot.data;
 
-                        return Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white24,
-                              borderRadius: BorderRadius.circular(30),
-                              // borderRadius: BorderRadius.only(
-                              //     topRight: Radius.circular(50),
-                              //     topLeft: Radius.circular(50)),
-                            ),
-                            child: Column(
-                              children: [
-                                _buildBadgeRequirementCards(
-                                    badgeRequirementList),
-                                badgeRequirementList.note == null
-                                    ? Container()
-                                    : Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            color: Colors.white,
-                                          ),
-                                          child: Text(
-                                            badgeRequirementList.note,
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 18,
+                              return Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white24,
+                                    borderRadius: BorderRadius.circular(30),
+                                    // borderRadius: BorderRadius.only(
+                                    //     topRight: Radius.circular(50),
+                                    //     topLeft: Radius.circular(50)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      _buildBadgeRequirementCards(
+                                          badgeRequirementList),
+                                      badgeRequirementList.note == null
+                                          ? Container()
+                                          : Padding(
+                                              padding: const EdgeInsets.all(8),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                  color: Colors.white,
+                                                ),
+                                                child: Text(
+                                                  badgeRequirementList.note,
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ),
-                              ],
-                            ),
-                          ),
-                        );
-                      } else {
-                        return Container();
-                      }
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }()));
                     },
                   ),
                 ],

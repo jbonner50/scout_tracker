@@ -19,7 +19,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   bool _isLoading = false;
 
-  int _rank = 0;
+  int _rankNum = 0;
   String _email;
   String _pass;
 
@@ -32,7 +32,8 @@ class _RegisterFormState extends State<RegisterForm> {
     'Second Class',
     'First Class',
     'Star',
-    'Life'
+    'Life',
+    'Eagle',
   ];
 
   final List<Widget> rankIcons = [
@@ -104,10 +105,12 @@ class _RegisterFormState extends State<RegisterForm> {
               _registerFormKey.currentState.save();
               print(_email);
               print(_pass);
-              print('$_rank');
+              print('$_rankNum');
               setState(() => _isLoading = true);
-              dynamic result = await AuthService()
-                  .register(email: _email, pass: _pass, rank: _rank);
+              dynamic result = await AuthService().register(
+                  email: _email,
+                  pass: _pass,
+                  rank: ranks[_rankNum].toLowerCase().replaceAll(" ", "-"));
               if (result == null) setState(() => _isLoading = false);
             } else {
               print('invalid');
@@ -198,20 +201,20 @@ class _RegisterFormState extends State<RegisterForm> {
   Widget _buildRankField() {
     return Row(
       children: [
-        rankIcons[_rank],
+        rankIcons[_rankNum],
         Expanded(
           child: Slider(
-            value: _rank.toDouble(),
+            value: _rankNum.toDouble(),
             onChanged: (newRank) {
-              setState(() => _rank = newRank.toInt());
+              setState(() => _rankNum = newRank.toInt());
               HapticFeedback.selectionClick();
             },
             inactiveColor: Colors.grey[200],
             activeColor: Colors.redAccent,
-            divisions: 6,
+            divisions: 7,
             min: 0,
-            max: 6,
-            label: '${ranks[_rank]}',
+            max: 7,
+            label: '${ranks[_rankNum]}',
           ),
         ),
       ],

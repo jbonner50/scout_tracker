@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 Widget circle(double w, double h, Color c) {
   return Container(
@@ -13,29 +12,10 @@ Widget circle(double w, double h, Color c) {
 }
 
 Widget backgroundGradient(context) {
-  MediaQueryData mediaQueryData = MediaQuery.of(context);
-  Size size = mediaQueryData.size;
-  double height = size.height;
+  Size size = MediaQuery.of(context).size;
   return Container(
-    width: mediaQueryData.size.width,
-    height: mediaQueryData.size.height,
-    decoration: new BoxDecoration(
-      gradient: new LinearGradient(
-        colors: [
-          Colors.amber[200],
-          Colors.redAccent,
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    ),
-  );
-}
-
-Widget backgroundCustomGradient(context, height) {
-  return Container(
-    width: MediaQuery.of(context).size.width,
-    height: height,
+    width: size.width,
+    height: size.height,
     decoration: new BoxDecoration(
       gradient: new LinearGradient(
         colors: [

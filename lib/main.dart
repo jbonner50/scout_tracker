@@ -46,7 +46,20 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    StorageService().saveBadgeJson();
+
+    List badgeNames;
+    DefaultAssetBundle.of(context)
+        .loadString('data/badge_list.txt')
+        .then((text) {
+      badgeNames = LineSplitter().convert(text);
+      try {
+        StorageService()
+          ..saveAllBadgesJson(badgeNames)
+          ..precacheImages(badgeNames, context);
+      } catch (e) {
+        print(e.toString());
+      }
+    });
 
     return StreamProvider<String>.value(
       initialData: 'loading',

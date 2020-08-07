@@ -31,7 +31,7 @@ class _BadgesState extends State<Badges> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _getBadgeLists().then((result) => setState(() => badgeSearchList = result));
+    _setBadgeLists().then((result) => setState(() => badgeSearchList = result));
     // _searchController.addListener(() => onSearchChanged);
   }
 
@@ -41,7 +41,7 @@ class _BadgesState extends State<Badges> {
     super.dispose();
   }
 
-  Future _getBadgeLists() async {
+  Future _setBadgeLists() async {
     String text =
         await DefaultAssetBundle.of(context).loadString('data/badge_list.txt');
 
@@ -71,11 +71,11 @@ class _BadgesState extends State<Badges> {
       Icons.hourglass_empty,
       // color: Colors.amberAccent,
     ),
-    'done': Icon(
+    'earned': Icon(
       Icons.check,
       // color: Colors.greenAccent,
     ),
-    'incomplete': Icon(
+    'unearned': Icon(
       Icons.clear,
       // color: Colors.redAccent,
     ),
@@ -109,23 +109,36 @@ class _BadgesState extends State<Badges> {
               // When the user taps the button, show a snackbar.
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BadgeDetails(
-                              badgeName: badgeName,
-                            )));
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a1, a2) => BadgeDetails(
+                      badgeName: badgeName,
+                    ),
+                    transitionsBuilder: (c, anim, a2, child) =>
+                        FadeTransition(opacity: anim, child: child),
+                    transitionDuration: Duration(milliseconds: 200),
+                  ),
+                );
               },
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset(
-                        'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                        height: 70, errorBuilder: (context, error, stackTrace) {
-                      print(error.toString());
-                      return Icon(Icons.not_interested, size: 50);
-                    }),
+                    Hero(
+                      tag: badgeName
+                          .toLowerCase()
+                          .replaceAll(' ', '-')
+                          .replaceAll(',', ''),
+                      child: Image.asset(
+                          'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                          height: 70,
+                          errorBuilder: (context, error, stackTrace) {
+                        print(error.toString());
+                        return Icon(Icons.not_interested, size: 50);
+                      }),
+                    ),
+
                     Expanded(
                       child: Align(
                         alignment: Alignment.center,
@@ -188,6 +201,7 @@ class _BadgesState extends State<Badges> {
             children: badgeSearchList.map<Widget>((badgeName) {
               return _buildBadgeTile(badgeName);
             }).toList(),
+            //DatabseService(uid: uid).getBadgeList(type: type, searchList: badgeSearchList)
           ),
         ),
       ),
@@ -290,8 +304,8 @@ class _BadgesState extends State<Badges> {
                       tabs: [
                         Tab(icon: indicators['all']),
                         Tab(icon: indicators['inprogress']),
-                        Tab(child: indicators['done']),
-                        Tab(child: indicators['incomplete']),
+                        Tab(icon: indicators['earned']),
+                        Tab(icon: indicators['unearned']),
                       ],
                     ),
                   ),
@@ -341,10 +355,7 @@ class _BadgesState extends State<Badges> {
             _buildBadges(type: BadgeList.all),
             _buildBadges(type: BadgeList.inprogress),
             _buildBadges(type: BadgeList.earned),
-            Container(
-              color: Colors.red,
-            ),
-            // _buildBadges(type: BadgeList.unearned),
+            _buildBadges(type: BadgeList.unearned),
           ],
         ),
       ),
