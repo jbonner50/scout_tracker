@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:scout_tracker/screens/home/badge_details.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
+import 'package:scout_tracker/services/database.dart';
 
 enum BadgeList { all, inprogress, earned, unearned }
 
@@ -42,13 +45,11 @@ class _BadgesState extends State<Badges> {
   }
 
   Future _setBadgeLists() async {
-    String text =
-        await DefaultAssetBundle.of(context).loadString('data/badge_list.txt');
+    String text = await rootBundle.loadString('data/badge_list.txt');
 
     badgeList = LineSplitter().convert(text);
     // badgeSearchList = List.from(badgeList);
-    text =
-        await DefaultAssetBundle.of(context).loadString('data/eagle_list.txt');
+    text = await rootBundle.loadString('data/eagle_list.txt');
     eagleList = LineSplitter().convert(text);
     badgeSearchList = List.from(badgeList);
     return badgeSearchList;
@@ -81,7 +82,7 @@ class _BadgesState extends State<Badges> {
     ),
   };
 
-  Widget _buildBadgeTile(String badgeName) {
+  Widget _buildBadgeTile(String badgeName, double progress) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -125,20 +126,12 @@ class _BadgesState extends State<Badges> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Hero(
-                      tag: badgeName
-                          .toLowerCase()
-                          .replaceAll(' ', '-')
-                          .replaceAll(',', ''),
-                      child: Image.asset(
-                          'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                          height: 70,
-                          errorBuilder: (context, error, stackTrace) {
-                        print(error.toString());
-                        return Icon(Icons.not_interested, size: 50);
-                      }),
-                    ),
-
+                    Image.asset(
+                        'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                        height: 70, errorBuilder: (context, error, stackTrace) {
+                      print(error.toString());
+                      return Icon(Icons.not_interested, size: 50);
+                    }),
                     Expanded(
                       child: Align(
                         alignment: Alignment.center,
@@ -151,21 +144,31 @@ class _BadgesState extends State<Badges> {
                         ),
                       ),
                     ),
-                    // SizedBox(height: 4),
-                    // LinearPercentIndicator(
-                    //   percent: 0.6,
-                    //   lineHeight: 10,
-                    //   linearGradient: new LinearGradient(
-                    //     colors: [
-                    //       Colors.amber[200],
-                    //       Colors.redAccent,
-                    //     ],
-                    //     begin: Alignment.topLeft,
-                    //     end: Alignment.bottomRight,
-                    //   ),
-                    //   backgroundColor: Colors.grey[200],
-                    //   clipLinearGradient: true,
-                    // ),
+                    SizedBox(height: 4),
+                    LinearPercentIndicator(
+                      percent: progress,
+                      lineHeight: 10,
+                      linearGradient: new LinearGradient(
+                        colors: [
+                          Colors.amber[200],
+                          Colors.redAccent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      backgroundColor: Colors.grey[200],
+                      clipLinearGradient: true,
+                      trailing: Container(
+                        margin: EdgeInsets.only(left: 4),
+                        child: Text(
+                          '${(progress * 100).truncate()}%',
+                          style: TextStyle(
+                              color: Colors.redAccent[100],
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -176,7 +179,7 @@ class _BadgesState extends State<Badges> {
     );
   }
 
-  Widget _buildBadges({BadgeList type}) {
+  Widget _buildBadges(BadgeList type, [Map filteredBadges]) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
@@ -189,27 +192,80 @@ class _BadgesState extends State<Badges> {
           //     topLeft: Radius.circular(50)),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: GridView.count(
-            crossAxisSpacing: 0,
-            mainAxisSpacing: 0,
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            crossAxisCount: 3,
-            scrollDirection: Axis.vertical,
-            childAspectRatio: 0.85,
-            children: badgeSearchList.map<Widget>((badgeName) {
-              return _buildBadgeTile(badgeName);
-            }).toList(),
-            //DatabseService(uid: uid).getBadgeList(type: type, searchList: badgeSearchList)
-          ),
-        ),
+            borderRadius: BorderRadius.circular(30),
+            child: (() {
+              if (filteredBadges == null || (filteredBadges?.isEmpty ?? true)) {
+                return Container(
+                  constraints: BoxConstraints.expand(),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.white,
+                      ),
+                      child: Text(
+                        (() {
+                          switch (type) {
+                            case BadgeList.inprogress:
+                              return 'No Badges In Progress';
+                              break;
+                            case BadgeList.earned:
+                              return 'No Badges Earned';
+                              break;
+                            case BadgeList.unearned:
+                              return 'No Badges Unearned';
+                              break;
+                            default:
+                              return 'Could Not Retrive Badges';
+                              break;
+                          }
+                        }()),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return GridView.count(
+                  crossAxisSpacing: 0,
+                  mainAxisSpacing: 0,
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  crossAxisCount: 3,
+                  scrollDirection: Axis.vertical,
+                  childAspectRatio: 0.85,
+                  //todo combine badgeSearchList with filteredbadgelist
+                  children: badgeSearchList
+                      .where((badgeName) => filteredBadges.keys.contains(
+                          badgeName
+                              .toLowerCase()
+                              .replaceAll(' ', '-')
+                              .replaceAll(',', '')))
+                      .map<Widget>(
+                        (badgeName) => _buildBadgeTile(
+                            badgeName,
+                            filteredBadges[badgeName
+                                    .toLowerCase()
+                                    .replaceAll(' ', '-')
+                                    .replaceAll(',', '')]
+                                .toDouble()),
+                      )
+                      .toList(),
+                );
+              }
+            }())),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final String uid = Provider.of<String>(context);
+
     return DefaultTabController(
       length: 4,
       child: NestedScrollView(
@@ -350,13 +406,42 @@ class _BadgesState extends State<Badges> {
         //   // ),
         // ),
 
-        body: TabBarView(
-          children: [
-            _buildBadges(type: BadgeList.all),
-            _buildBadges(type: BadgeList.inprogress),
-            _buildBadges(type: BadgeList.earned),
-            _buildBadges(type: BadgeList.unearned),
-          ],
+        body: StreamBuilder(
+          stream: DatabaseService(uid: uid).user,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map all = {}, inprogress = {}, earned = {}, unearned = {};
+              Map data = Map.from(snapshot.data['badge_progress']);
+              data.forEach((key, value) {
+                all.addAll({key: value});
+                if (value == 0) {
+                  unearned.addAll({key: value});
+                } else if (value == 1) {
+                  earned.addAll({key: value});
+                } else if (value > 0 && value < 1) {
+                  inprogress.addAll({key: value});
+                }
+              });
+
+              return TabBarView(
+                children: [
+                  _buildBadges(BadgeList.all, all),
+                  _buildBadges(BadgeList.inprogress, inprogress),
+                  _buildBadges(BadgeList.earned, earned),
+                  _buildBadges(BadgeList.unearned, unearned),
+                ],
+              );
+            } else {
+              return TabBarView(
+                children: [
+                  _buildBadges(BadgeList.all),
+                  _buildBadges(BadgeList.inprogress),
+                  _buildBadges(BadgeList.earned),
+                  _buildBadges(BadgeList.unearned),
+                ],
+              );
+            }
+          },
         ),
       ),
     );

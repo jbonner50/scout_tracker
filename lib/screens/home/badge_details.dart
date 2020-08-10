@@ -191,19 +191,13 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                             size: 35,
                           ),
                         ),
-                        Hero(
-                          tag: widget.badgeName
-                              .toLowerCase()
-                              .replaceAll(' ', '-')
-                              .replaceAll(',', ''),
-                          child: Image.asset(
-                              'assets/images/badges/${widget.badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                              height: 60,
-                              errorBuilder: (context, error, stackTrace) {
-                            print(error.toString());
-                            return Icon(Icons.not_interested, size: 50);
-                          }),
-                        ),
+                        Image.asset(
+                            'assets/images/badges/${widget.badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                            height: 60,
+                            errorBuilder: (context, error, stackTrace) {
+                          print(error.toString());
+                          return Icon(Icons.not_interested, size: 50);
+                        }),
                         SizedBox(width: 10),
                         Expanded(
                           child: AutoSizeText(
@@ -220,14 +214,24 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                           child: MaterialButton(
-                            onPressed: () {
-                              DatabaseService(uid: uid)
+                            onPressed: () async {
+                              DatabaseService database =
+                                  DatabaseService(uid: uid);
+                              database
                                   .updateRequirementListDocument(
                                       badgeRequirementList,
                                       widget.badgeName
                                           .toLowerCase()
                                           .replaceAll(' ', '-')
-                                          .replaceAll(',', ''));
+                                          .replaceAll(',', ''))
+                                  .whenComplete(() =>
+                                      database.updateBadgeProgressField(
+                                          widget.badgeName
+                                              .toLowerCase()
+                                              .replaceAll(' ', '-')
+                                              .replaceAll(',', ''),
+                                          badgeRequirementList));
+
                               print('saved reqs');
                             },
                             shape: RoundedRectangleBorder(

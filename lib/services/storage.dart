@@ -80,14 +80,14 @@ listRef.listAll().then(function(res) {
 */
   }
 
-  void precacheImages(List badgeNames, BuildContext context) {
-    for (var badgeName in badgeNames) {
-      String hyphenatedBadgeName =
-          badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
-      precacheImage(
-          AssetImage('assets/images/badges/$hyphenatedBadgeName.png'), context);
-    }
-  }
+  // void precacheImages(List badgeNames, BuildContext context) {
+  //   for (var badgeName in badgeNames) {
+  //     String hyphenatedBadgeName =
+  //         badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
+  //     precacheImage(
+  //         AssetImage('assets/images/badges/$hyphenatedBadgeName.png'), context);
+  //   }
+  // }
 
   Future readBadgeJson(String hyphenatedBadgeName) async {
     try {

@@ -556,7 +556,7 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                     MaterialButton(
-                      onPressed: () {},
+                      onPressed: () => AuthService().logout(),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50)),
                       padding: EdgeInsets.all(10),
@@ -568,7 +568,7 @@ class _ProfileState extends State<Profile> {
                       child: Row(
                         children: [
                           Text(
-                            'Edit',
+                            'Logout',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                           SizedBox(width: 5),

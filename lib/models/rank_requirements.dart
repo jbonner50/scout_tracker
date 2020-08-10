@@ -1,14 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class BadgeRequirementList {
-  List<BadgeRequirement> reqList;
+class Date {
+  int month;
+  int day;
+  int year;
+
+  Date.fromFormat(String formatted) {
+    List split = formatted.split("/");
+    this.month = split[0];
+    this.day = split[1];
+    this.month = split[2];
+  }
+
+  Date.fromDateTime(DateTime datetime) {
+    this.month = datetime.month;
+    this.day = datetime.day;
+    this.year = datetime.year;
+  }
+  @override
+  toString() => '${this.month}/${this.day}/${this.year}';
+}
+
+class RankRequirementList {
+  List<RankRequirement> reqList;
   String note;
   int numChildren = 0;
   int numChildrenRequired = 0;
   int numChildrenComplete = 0;
   bool subReqsComplete = false;
-  BadgeRequirement parent;
+  RankRequirement parent;
 
   void updateNumSubReqsComplete() {
     int complete = 0;
@@ -22,7 +43,7 @@ class BadgeRequirementList {
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getTotalSubReqsCompleted(List<BadgeRequirement> reqList) {
+  double getTotalSubReqsCompleted(List<RankRequirement> reqList) {
     double complete = 0;
     for (var req in reqList) {
       if (req.isCheckable && req.isComplete) {
@@ -34,7 +55,7 @@ class BadgeRequirementList {
     return complete;
   }
 
-  double getTotalSubReqsRequired(List<BadgeRequirement> reqList) {
+  double getTotalSubReqsRequired(List<RankRequirement> reqList) {
     double require = 0;
     for (var req in reqList) {
       if (req.isCheckable) {
@@ -65,33 +86,33 @@ class BadgeRequirementList {
   }
 
   //create reqList from json template
-  BadgeRequirementList.fromJsonMain(Map<String, dynamic> templateMap) {
+  RankRequirementList.fromJsonMain(Map<String, dynamic> templateMap) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
     this.numChildrenComplete = 0;
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     this.reqList = templateMap["root"]
-        .map<BadgeRequirement>(
-            (req) => BadgeRequirement.fromJson(req: req, parent: this))
+        .map<RankRequirement>(
+            (req) => RankRequirement.fromJson(req: req, parent: this))
         .toList();
   }
 
-  BadgeRequirementList.fromJsonSub(List templateList,
-      {int childrenRequired, BadgeRequirement parent}) {
+  RankRequirementList.fromJsonSub(List templateList,
+      {int childrenRequired, RankRequirement parent}) {
     this.numChildren = templateList.length;
     this.numChildrenRequired = childrenRequired;
     this.numChildrenComplete = 0;
 
     this.reqList = templateList
-        .map<BadgeRequirement>(
-            (req) => BadgeRequirement.fromJson(req: req, parent: this))
+        .map<RankRequirement>(
+            (req) => RankRequirement.fromJson(req: req, parent: this))
         .toList();
 
     this.parent = parent;
   }
 
-  BadgeRequirementList.fromFirestoreMain(
+  RankRequirementList.fromFirestoreMain(
       Map<String, dynamic> templateMap, Map<String, dynamic> firestoreData) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
@@ -103,17 +124,17 @@ class BadgeRequirementList {
     });
 
     this.reqList = templateMap["root"]
-        .map<BadgeRequirement>(
-          (req) => BadgeRequirement.fromFirestore(
+        .map<RankRequirement>(
+          (req) => RankRequirement.fromFirestore(
               req: req, firestoreData: firestoreData[req["req"]], parent: this),
         )
         .toList();
     this.parent = parent;
   }
 
-  BadgeRequirementList.fromFirestoreSub(List templateReqs,
+  RankRequirementList.fromFirestoreSub(List templateReqs,
       {int childrenRequired,
-      BadgeRequirement parent,
+      RankRequirement parent,
       Map<String, dynamic> firestoreData}) {
     this.numChildren = templateReqs.length;
     this.numChildrenRequired = childrenRequired;
@@ -123,7 +144,7 @@ class BadgeRequirementList {
     });
 
     this.reqList = templateReqs
-        .map<BadgeRequirement>((req) => BadgeRequirement.fromFirestore(
+        .map<RankRequirement>((req) => RankRequirement.fromFirestore(
             req: req, firestoreData: firestoreData[req["req"]], parent: this))
         .toList();
     this.parent = parent;
@@ -131,13 +152,17 @@ class BadgeRequirementList {
 //get reqList from firestoreData/template
 }
 
-class BadgeRequirement extends ChangeNotifier {
+class RankRequirement extends ChangeNotifier {
   String id;
   bool isCheckable;
   bool isComplete;
+  bool textbox;
   String description;
-  BadgeRequirementList subReqs;
-  BadgeRequirementList parent;
+  String text;
+  String initials;
+  Date date;
+  RankRequirementList subReqs;
+  RankRequirementList parent;
 
   void setIsComplete([bool newValue]) {
     if (newValue == null)
@@ -148,7 +173,7 @@ class BadgeRequirement extends ChangeNotifier {
     notifyListeners();
   }
 
-  // BadgeRequirement({
+  // RankRequirement({
   //   this.id = '',
   //   this.isCheckable = true,
   //   this.isComplete = false,
@@ -157,29 +182,35 @@ class BadgeRequirement extends ChangeNotifier {
   //   this.parent,
   // });
 
-  BadgeRequirement.fromJson({Map req, BadgeRequirementList parent}) {
+  RankRequirement.fromJson({Map req, RankRequirementList parent}) {
     this.id = req["req"];
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = false;
+    this.textbox = req["textbox"];
+    this.initials = "";
     this.description = req["text"];
     this.subReqs = req["sub_reqs"].length == 0
         ? null
-        : BadgeRequirementList.fromJsonSub(req["sub_reqs"],
+        : RankRequirementList.fromJsonSub(req["sub_reqs"],
             childrenRequired: req["num_reqd"], parent: this);
     this.parent = parent;
   }
 
-  BadgeRequirement.fromFirestore(
+  RankRequirement.fromFirestore(
       {Map req,
       Map<String, dynamic> firestoreData,
-      BadgeRequirementList parent}) {
+      RankRequirementList parent}) {
     this.id = req["req"];
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = firestoreData["is_complete"];
+    this.textbox = req["textbox"];
+    this.text = firestoreData["textbox"];
+    this.initials = firestoreData["initials"];
+    this.date = firestoreData["date"];
     this.description = req["text"];
     this.subReqs = req["sub_reqs"].length == 0
         ? null
-        : BadgeRequirementList.fromFirestoreSub(req["sub_reqs"],
+        : RankRequirementList.fromFirestoreSub(req["sub_reqs"],
             childrenRequired: req["num_reqd"],
             firestoreData: firestoreData["sub_reqs"],
             parent: this);

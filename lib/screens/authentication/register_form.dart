@@ -36,7 +36,6 @@ class _RegisterFormState extends State<RegisterForm> {
     'First Class',
     'Star',
     'Life',
-    'Eagle',
   ];
 
   final List<Widget> rankIcons = [
@@ -114,14 +113,11 @@ class _RegisterFormState extends State<RegisterForm> {
                   email: _email,
                   pass: _pass,
                   rank: ranks[_rankNum].toLowerCase().replaceAll(" ", "-"));
-              await DefaultAssetBundle.of(context)
-                  .loadString('data/badge_list.txt')
-                  .then((text) {
+              await rootBundle.loadString('data/badge_list.txt').then((text) {
                 List badgeNames = LineSplitter().convert(text);
                 try {
-                  StorageService()
-                    ..saveAllBadgesJson(badgeNames)
-                    ..precacheImages(badgeNames, context);
+                  StorageService().saveAllBadgesJson(badgeNames);
+                  // ..precacheImages(badgeNames, context);
                 } catch (e) {
                   print(e.toString());
                 }
@@ -226,9 +222,9 @@ class _RegisterFormState extends State<RegisterForm> {
             },
             inactiveColor: Colors.grey[200],
             activeColor: Colors.redAccent,
-            divisions: 7,
+            divisions: 6,
             min: 0,
-            max: 7,
+            max: 6,
             label: '${ranks[_rankNum]}',
           ),
         ),

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:scout_tracker/models/badge_requirements.dart';
 import 'package:scout_tracker/services/storage.dart';
 
@@ -32,15 +35,33 @@ class DatabaseService {
       Firestore.instance.collection('scouts');
 
   Future createScout(String username, String rank) async {
+    List badgeNames = LineSplitter()
+        .convert(await rootBundle.loadString('data/badge_list.txt'));
     return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
+      'badge_progress': Map.fromIterable(badgeNames,
+          key: (k) => k.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''),
+          value: (v) => 0),
     });
 
     // .then((_) => scoutCollection.document(uid)
     //   ..collection('badges')
     //   ..collection('ranks'));
   }
+
+  Future updateBadgeProgressField(String hyphenatedBadgeName,
+      BadgeRequirementList badgeRequirementList) async {
+    DocumentSnapshot user = await scoutCollection.document(uid).get();
+    Map progress = user.data['badge_progress'];
+    progress.update(
+        hyphenatedBadgeName, (_) => badgeRequirementList.requirementProgress);
+    return scoutCollection.document(uid).setData({
+      'badge_progress': progress,
+    }, merge: true);
+  }
+
+  Stream get user => scoutCollection.document(uid).snapshots();
 
   Future getBadgeData(String hyphenatedBadgeName) async {
     DocumentSnapshot doc = await scoutCollection
