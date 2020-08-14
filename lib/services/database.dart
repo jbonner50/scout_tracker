@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:scout_tracker/models/badge_requirements.dart';
+import 'package:scout_tracker/models/rank_requirements.dart';
 import 'package:scout_tracker/services/storage.dart';
 
 // class Date {
@@ -35,12 +36,25 @@ class DatabaseService {
       Firestore.instance.collection('scouts');
 
   Future createScout(String username, String rank) async {
-    List badgeNames = LineSplitter()
+    final List badgeNames = LineSplitter()
         .convert(await rootBundle.loadString('data/badge_list.txt'));
+    final List<String> rankNames = [
+      'Scout',
+      'Tenderfoot',
+      'Second Class',
+      'First Class',
+      'Star',
+      'Life',
+      'Eagle',
+    ];
+
     return scoutCollection.document(uid).setData({
       'username': username,
       'rank': rank,
       'badge_progress': Map.fromIterable(badgeNames,
+          key: (k) => k.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''),
+          value: (v) => 0),
+      'rank_progress': Map.fromIterable(rankNames,
           key: (k) => k.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''),
           value: (v) => 0),
     });
@@ -61,7 +75,24 @@ class DatabaseService {
     }, merge: true);
   }
 
+  Future updateRankProgressField(String hyphenatedRankName,
+      RankRequirementList rankRequirementList) async {
+    DocumentSnapshot user = await scoutCollection.document(uid).get();
+    Map progress = user.data['rank_progress'];
+    print(rankRequirementList.getTotalSubReqsCompleted(rankRequirementList));
+    print(rankRequirementList.getTotalSubReqsRequired(rankRequirementList));
+    progress.update(
+        hyphenatedRankName, (_) => rankRequirementList.requirementProgress);
+    return scoutCollection.document(uid).setData({
+      'rank_progress': progress,
+    }, merge: true);
+  }
+
   Stream get user => scoutCollection.document(uid).snapshots();
+  Future<String> get currentRank async => await scoutCollection
+      .document(uid)
+      .get()
+      .then((value) => value.data['rank']);
 
   Future getBadgeData(String hyphenatedBadgeName) async {
     DocumentSnapshot doc = await scoutCollection
@@ -78,7 +109,7 @@ class DatabaseService {
   }
 
   //create/update Firestore map from reqList
-  Future updateRequirementListDocument(
+  Future updateBadgeDocument(
       BadgeRequirementList badgeRequirementList, String hyphenatedBadgeName) {
     Map<String, dynamic> firestoreData =
         badgeRequirementList.convertReqListToFirestore();
@@ -88,8 +119,33 @@ class DatabaseService {
         .collection('badges')
         .document(hyphenatedBadgeName)
         .setData(firestoreData);
+  }
 
-    // badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', ''))
+  Future<RankRequirementList> getRankData(String hyphenatedRankName) async {
+    DocumentSnapshot doc = await scoutCollection
+        .document(uid)
+        .collection('ranks')
+        .document(hyphenatedRankName)
+        .get();
+    print(doc.exists);
+    print(hyphenatedRankName);
+    Map<String, dynamic> templateData =
+        await StorageService().readRankJson(hyphenatedRankName);
+    return doc.exists
+        ? RankRequirementList.fromFirestoreMain(templateData, doc.data)
+        : RankRequirementList.fromJsonMain(templateData);
+  }
+
+  Future updateRankDocument(
+      RankRequirementList rankRequirementList, String hyphenatedRankName) {
+    Map<String, dynamic> firestoreData =
+        rankRequirementList.convertReqListToFirestore();
+
+    return scoutCollection
+        .document(uid)
+        .collection('ranks')
+        .document(hyphenatedRankName)
+        .setData(firestoreData);
   }
 
   // //set list of badges based on progress

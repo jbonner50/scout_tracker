@@ -60,34 +60,7 @@ class StorageService {
           badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
       saveBadgeJson(hyphenatedBadgeName);
     }
-
-    /*
-    // Create a reference under which you want to list
-var listRef = storageRef.child('files/uid');
-
-// Find all the prefixes and items.
-listRef.listAll().then(function(res) {
-  res.prefixes.forEach(function(folderRef) {
-    // All the prefixes under listRef.
-    // You may call listAll() recursively on them.
-  });
-  res.items.forEach(function(itemRef) {
-    // All the items under listRef.
-  });
-}).catch(function(error) {
-  // Uh-oh, an error occurred!
-});
-*/
   }
-
-  // void precacheImages(List badgeNames, BuildContext context) {
-  //   for (var badgeName in badgeNames) {
-  //     String hyphenatedBadgeName =
-  //         badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
-  //     precacheImage(
-  //         AssetImage('assets/images/badges/$hyphenatedBadgeName.png'), context);
-  //   }
-  // }
 
   Future readBadgeJson(String hyphenatedBadgeName) async {
     try {
@@ -104,35 +77,72 @@ listRef.listAll().then(function(res) {
     }
   }
 
-//   //brew list from snapshot
-//   List<Brew> _brewListFromSnapshot(QuerySnapshot snapshot) {
-//     return snapshot.documents.map((doc) {
-//       return Brew(
-//         name: doc.data['name'] ?? '',
-//         strength: doc.data['strength'] ?? 0,
-//         sugars: doc.data['sugars'] ?? '0',
-//       );
-//     }).toList();
-//   }
+  Future getRankJson(String hyphenatedRankName) async {
+    final StorageReference jsonFile =
+        scoutStorage.child('ranks/$hyphenatedRankName-v1.json');
+    try {
+      String downloadUrl = await jsonFile.getDownloadURL();
+      final Response response = await get(downloadUrl);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print(
+            'Request failed with status: ${response.statusCode}. Rank $hyphenatedRankName');
+        return null;
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
-// // userData from snapshot
-//   UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-//     return UserData(
-//       uid: uid,
-//       name: snapshot.data['name'],
-//       sugars: snapshot.data['sugars'],
-//       strength: snapshot.data['strength'],
-//     );
-//   }
+  Future<void> saveRankJson(String hyphenatedRankName) async {
+    dynamic rankData = await getRankJson(hyphenatedRankName);
 
-//   // get brews stream
-//   Stream<List<Brew>> get brews {
-//     return brewCollection.snapshots().map(_brewListFromSnapshot);
-//   }
+    if (rankData != null) {
+      //TODO add check to see if files exist
 
-//   //get user doc stream
-//   Stream<UserData> get userData {
-//     return brewCollection.document(uid).snapshots().map(_userDataFromSnapshot);
-//   }
-// }
+      final directory = await getApplicationDocumentsDirectory();
+      File rankFile = File('${directory.path}/ranks/$hyphenatedRankName.json');
+      if (rankFile.existsSync()) {
+        //add new loadout to file
+        rankFile.writeAsString(json.encode(rankData));
+      } else {
+        //create file and add new loadout as first entry
+        rankFile.createSync(recursive: true);
+        rankFile.writeAsStringSync(json.encode(rankData));
+      }
+    }
+  }
+
+  Future<void> saveAllRanksJson() async {
+    // final dir = await getApplicationDocumentsDirectory();
+    // dir.deleteSync(recursive: true);
+    final List<String> rankNames = [
+      'Scout',
+      'Tenderfoot',
+      'Second Class',
+      'First Class',
+      'Star',
+      'Life',
+      'Eagle',
+    ];
+    for (var rankName in rankNames) {
+      String hyphenatedRankName = rankName.toLowerCase().replaceAll(' ', '-');
+      await saveRankJson(hyphenatedRankName);
+    }
+  }
+
+  Future readRankJson(String hyphenatedRankName) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      File rankFile = File('${directory.path}/ranks/$hyphenatedRankName.json');
+      String contents = await rankFile.readAsString();
+      dynamic data = json.decode(contents);
+      return data;
+    } catch (e) {
+      // If encountering an error, return 0.
+      print('error');
+      return 0;
+    }
+  }
 }

@@ -6,7 +6,7 @@ class BadgeRequirementList {
   String note;
   int numChildren = 0;
   int numChildrenRequired = 0;
-  int numChildrenComplete = 0;
+  int numChildrenCompleted = 0;
   bool subReqsComplete = false;
   BadgeRequirement parent;
 
@@ -15,40 +15,35 @@ class BadgeRequirementList {
     this.reqList.forEach((req) {
       if (req.isComplete) complete++;
     });
-    this.numChildrenComplete = complete;
+    this.numChildrenCompleted = complete;
 
     this.subReqsComplete =
-        (this.numChildrenComplete >= this.numChildrenRequired);
+        (this.numChildrenCompleted >= this.numChildrenRequired);
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getTotalSubReqsCompleted(List<BadgeRequirement> reqList) {
-    double complete = 0;
-    for (var req in reqList) {
-      if (req.isCheckable && req.isComplete) {
-        complete++;
-      } else if (req.subReqs != null) {
-        complete = complete + getTotalSubReqsCompleted(req.subReqs.reqList);
+  double getTotalSubReqsCompleted(BadgeRequirementList badgeReqList) {
+    double require = badgeReqList.numChildrenCompleted.toDouble();
+    for (var req in badgeReqList.reqList) {
+      if (req.subReqs != null) {
+        require += getTotalSubReqsCompleted(req.subReqs);
       }
     }
-    return complete;
+    return require;
   }
 
-  double getTotalSubReqsRequired(List<BadgeRequirement> reqList) {
-    double require = 0;
-    for (var req in reqList) {
-      if (req.isCheckable) {
-        require++;
-      } else if (req.subReqs != null) {
-        require = require + getTotalSubReqsCompleted(req.subReqs.reqList);
+  double getTotalSubReqsRequired(BadgeRequirementList badgeReqList) {
+    double require = badgeReqList.numChildrenRequired.toDouble();
+    for (var req in badgeReqList.reqList) {
+      if (req.subReqs != null) {
+        require += getTotalSubReqsRequired(req.subReqs);
       }
     }
     return require;
   }
 
   double get requirementProgress =>
-      getTotalSubReqsCompleted(this.reqList) /
-      getTotalSubReqsRequired(this.reqList);
+      getTotalSubReqsCompleted(this) / getTotalSubReqsRequired(this);
 
   // convert reqList to a map for firestore (recursive)
   Map<String, dynamic> convertReqListToFirestore() {
@@ -68,7 +63,7 @@ class BadgeRequirementList {
   BadgeRequirementList.fromJsonMain(Map<String, dynamic> templateMap) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     this.reqList = templateMap["root"]
@@ -81,7 +76,7 @@ class BadgeRequirementList {
       {int childrenRequired, BadgeRequirement parent}) {
     this.numChildren = templateList.length;
     this.numChildrenRequired = childrenRequired;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
 
     this.reqList = templateList
         .map<BadgeRequirement>(
@@ -95,11 +90,11 @@ class BadgeRequirementList {
       Map<String, dynamic> templateMap, Map<String, dynamic> firestoreData) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     firestoreData.forEach((key, value) {
-      if (value['is_complete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenCompleted++;
     });
 
     this.reqList = templateMap["root"]
@@ -119,7 +114,7 @@ class BadgeRequirementList {
     this.numChildrenRequired = childrenRequired;
 
     firestoreData.forEach((key, value) {
-      if (value['is_complete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenCompleted++;
     });
 
     this.reqList = templateReqs

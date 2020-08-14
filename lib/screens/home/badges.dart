@@ -7,7 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:scout_tracker/screens/home/badge_details.dart';
+import 'package:scout_tracker/screens/home/badge.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
 import 'package:scout_tracker/services/database.dart';
 
@@ -112,7 +112,7 @@ class _BadgesState extends State<Badges> {
                 Navigator.push(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (c, a1, a2) => BadgeDetails(
+                    pageBuilder: (c, a1, a2) => Badge(
                       badgeName: badgeName,
                     ),
                     transitionsBuilder: (c, anim, a2, child) =>

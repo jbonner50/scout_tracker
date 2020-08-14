@@ -10,20 +10,19 @@ import 'package:scout_tracker/models/badge_requirements.dart';
 import 'package:scout_tracker/services/database.dart';
 import 'package:scout_tracker/services/storage.dart';
 
-class BadgeDetails extends StatefulWidget {
+class Badge extends StatefulWidget {
   final String badgeName;
-  BadgeDetails({this.badgeName});
+  Badge({this.badgeName});
 
   @override
-  _BadgeDetailsState createState() => _BadgeDetailsState();
+  _BadgeState createState() => _BadgeState();
 }
 
-class _BadgeDetailsState extends State<BadgeDetails> {
+class _BadgeState extends State<Badge> {
   BadgeRequirementList badgeRequirementList;
 
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  Column _buildBadgeRequirementCards(BadgeRequirementList badgeRequirements,
-      [bool test = false]) {
+  Column _buildBadgeRequirementCards(BadgeRequirementList badgeRequirements) {
     List<Widget> cards = [];
     badgeRequirements.reqList.forEach((req) {
       List splitID = req.id.split(".");
@@ -39,13 +38,13 @@ class _BadgeDetailsState extends State<BadgeDetails> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: Colors.white,
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //checkbox
 
@@ -87,7 +86,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                                 onSelected: (_) {},
                                 selected: req.isComplete,
                                 label: Text(
-                                  '${req.subReqs.numChildrenComplete} / ${req.subReqs.numChildrenRequired}',
+                                  '${req.subReqs.numChildrenCompleted} / ${req.subReqs.numChildrenRequired}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -120,7 +119,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                 ? Container()
                 : Container(
                     margin: EdgeInsets.only(left: 30),
-                    child: _buildBadgeRequirementCards(req.subReqs, true),
+                    child: _buildBadgeRequirementCards(req.subReqs),
                   ),
           ],
         ),
@@ -218,7 +217,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                               DatabaseService database =
                                   DatabaseService(uid: uid);
                               database
-                                  .updateRequirementListDocument(
+                                  .updateBadgeDocument(
                                       badgeRequirementList,
                                       widget.badgeName
                                           .toLowerCase()

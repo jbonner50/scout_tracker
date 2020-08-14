@@ -115,13 +115,11 @@ class _RegisterFormState extends State<RegisterForm> {
                   rank: ranks[_rankNum].toLowerCase().replaceAll(" ", "-"));
               await rootBundle.loadString('data/badge_list.txt').then((text) {
                 List badgeNames = LineSplitter().convert(text);
-                try {
-                  StorageService().saveAllBadgesJson(badgeNames);
-                  // ..precacheImages(badgeNames, context);
-                } catch (e) {
-                  print(e.toString());
-                }
+
+                StorageService().saveAllBadgesJson(badgeNames);
               });
+              StorageService().saveAllRanksJson();
+
               if (result == null) setState(() => _isLoading = false);
             } else {
               print('invalid');

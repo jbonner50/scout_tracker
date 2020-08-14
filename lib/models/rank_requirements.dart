@@ -8,15 +8,15 @@ class Date {
 
   Date.fromFormat(String formatted) {
     List split = formatted.split("/");
-    this.month = split[0];
-    this.day = split[1];
-    this.month = split[2];
+    this.month = int.parse(split[0]);
+    this.day = int.parse(split[1]);
+    this.year = int.parse(split[2]);
   }
 
   Date.fromDateTime(DateTime datetime) {
     this.month = datetime.month;
     this.day = datetime.day;
-    this.year = datetime.year;
+    this.year = int.parse(datetime.year.toString().substring(2));
   }
   @override
   toString() => '${this.month}/${this.day}/${this.year}';
@@ -27,7 +27,7 @@ class RankRequirementList {
   String note;
   int numChildren = 0;
   int numChildrenRequired = 0;
-  int numChildrenComplete = 0;
+  int numChildrenCompleted = 0;
   bool subReqsComplete = false;
   RankRequirement parent;
 
@@ -36,48 +36,45 @@ class RankRequirementList {
     this.reqList.forEach((req) {
       if (req.isComplete) complete++;
     });
-    this.numChildrenComplete = complete;
+    this.numChildrenCompleted = complete;
 
     this.subReqsComplete =
-        (this.numChildrenComplete >= this.numChildrenRequired);
+        (this.numChildrenCompleted >= this.numChildrenRequired);
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getTotalSubReqsCompleted(List<RankRequirement> reqList) {
-    double complete = 0;
-    for (var req in reqList) {
-      if (req.isCheckable && req.isComplete) {
-        complete++;
-      } else if (req.subReqs != null) {
-        complete = complete + getTotalSubReqsCompleted(req.subReqs.reqList);
+  double getTotalSubReqsCompleted(RankRequirementList rankReqList) {
+    double require = rankReqList.numChildrenCompleted.toDouble();
+    for (var req in rankReqList.reqList) {
+      if (req.subReqs != null) {
+        require += getTotalSubReqsCompleted(req.subReqs);
       }
     }
-    return complete;
+    return require;
   }
 
-  double getTotalSubReqsRequired(List<RankRequirement> reqList) {
-    double require = 0;
-    for (var req in reqList) {
-      if (req.isCheckable) {
-        require++;
-      } else if (req.subReqs != null) {
-        require = require + getTotalSubReqsCompleted(req.subReqs.reqList);
+  double getTotalSubReqsRequired(RankRequirementList rankReqList) {
+    double require = rankReqList.numChildrenRequired.toDouble();
+    for (var req in rankReqList.reqList) {
+      if (req.subReqs != null) {
+        require += getTotalSubReqsRequired(req.subReqs);
       }
     }
     return require;
   }
 
   double get requirementProgress =>
-      getTotalSubReqsCompleted(this.reqList) /
-      getTotalSubReqsRequired(this.reqList);
+      getTotalSubReqsCompleted(this) / getTotalSubReqsRequired(this);
 
-  // convert reqList to a map for firestore (recursive)
+// convert reqList to a map for firestore (recursive)
   Map<String, dynamic> convertReqListToFirestore() {
     Map<String, dynamic> firestoreData = {};
 
     this.reqList.forEach((req) => firestoreData.addAll({
           req.id: {
             'is_complete': req.isComplete,
+            'initials': req.initials,
+            'date': req.date?.toString(),
             'sub_reqs': req.subReqs?.convertReqListToFirestore(),
           }
         }));
@@ -89,7 +86,7 @@ class RankRequirementList {
   RankRequirementList.fromJsonMain(Map<String, dynamic> templateMap) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     this.reqList = templateMap["root"]
@@ -102,7 +99,7 @@ class RankRequirementList {
       {int childrenRequired, RankRequirement parent}) {
     this.numChildren = templateList.length;
     this.numChildrenRequired = childrenRequired;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
 
     this.reqList = templateList
         .map<RankRequirement>(
@@ -116,11 +113,11 @@ class RankRequirementList {
       Map<String, dynamic> templateMap, Map<String, dynamic> firestoreData) {
     this.numChildren = templateMap["root"].length;
     this.numChildrenRequired = templateMap["root"].length;
-    this.numChildrenComplete = 0;
+    this.numChildrenCompleted = 0;
     this.note = templateMap.containsKey("note") ? templateMap["note"] : null;
 
     firestoreData.forEach((key, value) {
-      if (value['is_complete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenCompleted++;
     });
 
     this.reqList = templateMap["root"]
@@ -140,7 +137,7 @@ class RankRequirementList {
     this.numChildrenRequired = childrenRequired;
 
     firestoreData.forEach((key, value) {
-      if (value['is_complete']) this.numChildrenComplete++;
+      if (value['is_complete']) this.numChildrenCompleted++;
     });
 
     this.reqList = templateReqs
@@ -164,12 +161,22 @@ class RankRequirement extends ChangeNotifier {
   RankRequirementList subReqs;
   RankRequirementList parent;
 
-  void setIsComplete([bool newValue]) {
+  void setIsComplete(bool newValue) {
     if (newValue == null)
       this.isComplete = !this.isComplete;
     else
       this.isComplete = newValue;
     this.parent.updateNumSubReqsComplete();
+    notifyListeners();
+  }
+
+  void setInitials(String initials) {
+    this.initials = initials;
+    notifyListeners();
+  }
+
+  void setDate(DateTime datetime) {
+    this.date = datetime == null ? null : Date.fromDateTime(datetime);
     notifyListeners();
   }
 
@@ -187,7 +194,6 @@ class RankRequirement extends ChangeNotifier {
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = false;
     this.textbox = req["textbox"];
-    this.initials = "";
     this.description = req["text"];
     this.subReqs = req["sub_reqs"].length == 0
         ? null
@@ -204,9 +210,11 @@ class RankRequirement extends ChangeNotifier {
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = firestoreData["is_complete"];
     this.textbox = req["textbox"];
-    this.text = firestoreData["textbox"];
+    this.text = firestoreData["text"];
     this.initials = firestoreData["initials"];
-    this.date = firestoreData["date"];
+    this.date = firestoreData["date"] == null
+        ? null
+        : Date.fromFormat(firestoreData["date"]);
     this.description = req["text"];
     this.subReqs = req["sub_reqs"].length == 0
         ? null

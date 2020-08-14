@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:scout_tracker/services/auth.dart';
+import 'package:scout_tracker/services/database.dart';
 import 'package:scout_tracker/shared.dart';
 
 class Profile extends StatefulWidget {
@@ -29,9 +32,9 @@ class _ProfileState extends State<Profile> {
   bool isEditingLeadership = false;
   bool isEditingCamping = false;
 
-  Widget _buildOverviewCard() {
+  Widget _buildOverviewCard(Map<String, dynamic> userData) {
     return Container(
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -64,7 +67,7 @@ class _ProfileState extends State<Profile> {
                 Chip(
                   backgroundColor: Colors.redAccent[100],
                   label: Text(
-                    '23 / 31',
+                    '${(userData['rank_progress'][userData['rank']] * 100).truncate()} %',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -160,9 +163,9 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildLeadershipCard() {
+  Widget _buildLeadershipCard(Map<String, dynamic> userData) {
     return Container(
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -191,23 +194,15 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               Spacer(),
-              isEditingLeadership
-                  ? ActionChip(
-                      onPressed: () {
-                        print('done');
-                        setState(() => isEditingLeadership = false);
-                      },
-                      label: Icon(Icons.check, color: Colors.white, size: 20),
-                      backgroundColor: Colors.redAccent[100],
-                    )
-                  : ActionChip(
-                      onPressed: () {
-                        print('pressed');
-                        setState(() => isEditingLeadership = true);
-                      },
-                      label: Icon(Icons.edit, color: Colors.white, size: 20),
-                      backgroundColor: Colors.redAccent[100],
-                    )
+              ActionChip(
+                onPressed: () {
+                  print('done');
+                  setState(() => isEditingLeadership = !isEditingLeadership);
+                },
+                label: Icon(isEditingLeadership ? Icons.check : Icons.edit,
+                    color: Colors.white, size: 20),
+                backgroundColor: Colors.redAccent[100],
+              )
             ],
           ),
           Container(
@@ -296,9 +291,9 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildCampingCard() {
+  Widget _buildCampingCard(Map<String, dynamic> userData) {
     return Container(
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -327,23 +322,15 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               Spacer(),
-              isEditingCamping
-                  ? ActionChip(
-                      onPressed: () {
-                        print('done');
-                        setState(() => isEditingCamping = false);
-                      },
-                      label: Icon(Icons.check, color: Colors.white, size: 20),
-                      backgroundColor: Colors.redAccent[100],
-                    )
-                  : ActionChip(
-                      onPressed: () {
-                        print('pressed');
-                        setState(() => isEditingCamping = true);
-                      },
-                      label: Icon(Icons.edit, color: Colors.white, size: 20),
-                      backgroundColor: Colors.redAccent[100],
-                    )
+              ActionChip(
+                onPressed: () {
+                  print('done');
+                  setState(() => isEditingCamping = !isEditingCamping);
+                },
+                label: Icon(isEditingCamping ? Icons.check : Icons.edit,
+                    color: Colors.white, size: 20),
+                backgroundColor: Colors.redAccent[100],
+              )
             ],
           ),
           Container(
@@ -434,182 +421,201 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final String uid = Provider.of<String>(context);
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height / 3.5,
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.fromLTRB(40, 10, 40, 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 54,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.lightBlue[100],
-                        backgroundImage: AssetImage('assets/images/scout.png'),
-                        radius: 50,
-                      ),
-                    ),
-                    SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      child: StreamBuilder<DocumentSnapshot>(
+          stream: DatabaseService(uid: uid).user,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Map<String, dynamic> userData = snapshot.data.data;
+              return Column(
+                children: [
+                  Container(
+                    height: MediaQuery.of(context).size.height / 6,
+                    padding: EdgeInsets.fromLTRB(40, 10, 40, 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'jbonner50',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30),
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 54,
+                          child: CircleAvatar(
+                            backgroundColor: Colors.lightBlue[100],
+                            backgroundImage:
+                                AssetImage('assets/images/scout.png'),
+                            radius: 50,
                           ),
                         ),
-                        Row(
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.keyboard_capslock, color: Colors.white),
-                            Text(
-                              'Tenderfoot',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                userData['username'],
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30),
+                              ),
                             ),
-                            SizedBox(width: 10),
-                            Text(
-                              '# ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
-                            ),
-                            Text(
-                              '221',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
+                            Row(
+                              children: [
+                                Icon(Icons.keyboard_capslock,
+                                    color: Colors.white),
+                                Text(
+                                  userData['rank'],
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                SizedBox(width: 10),
+                                // Text(
+                                //   '# ',
+                                //   style: TextStyle(
+                                //       color: Colors.white,
+                                //       fontWeight: FontWeight.bold,
+                                //       fontSize: 20),
+                                // ),
+                                // Text(
+                                //   '221',
+                                //   style: TextStyle(
+                                //       color: Colors.white, fontSize: 20),
+                                // ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          'Rank Progress',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
-                        SizedBox(height: 10),
-                        LinearPercentIndicator(
-                          width: MediaQuery.of(context).size.width / 5,
-                          animation: true,
-                          animationDuration: 800,
-                          percent: 50 / 100,
-                          lineHeight: 35,
-                          progressColor: Colors.white,
-                          trailing: Container(
-                            margin: EdgeInsets.only(left: 20),
-                            child: Text(
-                              '50%',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                        MaterialButton(
+                          onPressed: () => AuthService().logout(),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50)),
+                          padding: EdgeInsets.all(10),
+                          color: Colors.white24,
+                          elevation: 0,
+                          highlightElevation: 0,
+                          splashColor: Colors.redAccent[100],
+                          highlightColor: Colors.transparent,
+                          child: Row(
+                            children: [
+                              Text(
+                                'Edit',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                              SizedBox(width: 5),
+                              Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ],
                           ),
-                          // linearGradient: LinearGradient(
-                          //   colors: [
-                          //     Colors.amber[200],
-                          //     Colors.redAccent,
-                          //   ],
-                          // ),
-                          backgroundColor: Colors.white24,
                         ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        Text(
-                          'Badges',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          '33',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 35),
-                        ),
-                      ],
-                    ),
-                    MaterialButton(
-                      onPressed: () => AuthService().logout(),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50)),
-                      padding: EdgeInsets.all(10),
-                      color: Colors.white24,
-                      elevation: 0,
-                      highlightElevation: 0,
-                      splashColor: Colors.redAccent[100],
-                      highlightColor: Colors.transparent,
-                      child: Row(
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     Column(
+                    //       children: [
+                    //         Text(
+                    //           'Rank Progress',
+                    //           style: TextStyle(
+                    //               color: Colors.white,
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 20),
+                    //         ),
+                    //         SizedBox(height: 10),
+                    //         LinearPercentIndicator(
+                    //           width: MediaQuery.of(context).size.width / 5,
+                    //           animation: true,
+                    //           animationDuration: 400,
+                    //           percent: userData['rank_progress']
+                    //                   [userData['rank']]
+                    //               .toDouble(),
+                    //           lineHeight: 35,
+                    //           progressColor: Colors.white,
+                    //           linearStrokeCap: LinearStrokeCap.roundAll,
+                    //           trailing: Container(
+                    //             margin: EdgeInsets.only(left: 20),
+                    //             child: Text(
+                    //               '${(userData['rank_progress'][userData['rank']] * 100).truncate()}%',
+                    //               style: TextStyle(
+                    //                   color: Colors.white,
+                    //                   fontSize: 20,
+                    //                   fontWeight: FontWeight.bold),
+                    //             ),
+                    //           ),
+                    //           // linearGradient: LinearGradient(
+                    //           //   colors: [
+                    //           //     Colors.amber[200],
+                    //           //     Colors.redAccent,
+                    //           //   ],
+                    //           // ),
+                    //           backgroundColor: Colors.white24,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     Column(
+                    //       children: [
+                    //         Text(
+                    //           'Badges Earned',
+                    //           style: TextStyle(
+                    //               color: Colors.white,
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 20),
+                    //         ),
+                    //         SizedBox(height: 10),
+                    //         Text(
+                    //           (() {
+                    //             int complete = 0;
+                    //             userData['badge_progress']
+                    //                 .forEach((key, value) {
+                    //               if (value == 1) complete++;
+                    //             });
+                    //             return complete.toString();
+                    //           }()),
+                    //           style: TextStyle(
+                    //               color: Colors.white,
+                    //               fontWeight: FontWeight.bold,
+                    //               fontSize: 35),
+                    //         ),
+                    //       ],
+                    //     ),
+
+                    //   ],
+                    // ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(30),
+                        // borderRadius: BorderRadius.only(
+                        //     topRight: Radius.circular(50),
+                        //     topLeft: Radius.circular(50)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Logout',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                          SizedBox(width: 5),
-                          Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                          _buildOverviewCard(userData),
+                          SizedBox(height: 16),
+                          _buildLeadershipCard(userData),
+                          SizedBox(height: 16),
+                          _buildCampingCard(userData),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(30),
-                // borderRadius: BorderRadius.only(
-                //     topRight: Radius.circular(50),
-                //     topLeft: Radius.circular(50)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildOverviewCard(),
-                  SizedBox(height: 16),
-                  _buildLeadershipCard(),
-                  SizedBox(height: 16),
-                  _buildCampingCard(),
+                  ),
                 ],
-              ),
-            ),
-          ),
-        ],
-      ),
+              );
+            } else {
+              return Container();
+            }
+          }),
     );
   }
 }

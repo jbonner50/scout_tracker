@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scout_tracker/screens/home/badges.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
-import 'package:scout_tracker/screens/home/rank.dart';
+import 'package:scout_tracker/screens/home/ranks.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class Home extends StatefulWidget {
@@ -18,7 +18,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _icon = Icon(Icons.add);
 
   List<Widget> _tabs = [
-    Rank(key: ValueKey(1)),
+    // Container(key: ValueKey(1)),
+    Ranks(key: ValueKey(1)),
     Badges(key: ValueKey(2)),
     Profile(key: ValueKey(3)),
   ];

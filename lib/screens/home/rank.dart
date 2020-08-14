@@ -1,31 +1,84 @@
-import 'dart:convert';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:circular_check_box/circular_check_box.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:scout_tracker/models/badge_requirements.dart';
+import 'package:scout_tracker/models/rank_requirements.dart';
 import 'package:scout_tracker/services/database.dart';
-import 'package:scout_tracker/services/storage.dart';
 
 class Rank extends StatefulWidget {
-  final String badgeName;
-  Rank({this.badgeName});
+  // final String hyphenatedRankName;
+  final RankRequirementList rankRequirementList;
+  Rank({this.rankRequirementList});
 
   @override
   _RankState createState() => _RankState();
 }
 
-class _RankState extends State<Rank> {
-  BadgeRequirementList badgeRequirementList;
+class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  // Future _loadingRequirements;
 
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';
-  Column _buildBadgeRequirementCards(BadgeRequirementList badgeRequirements,
-      [bool test = false]) {
+
+  Future<String> _showInitialsDialog() {
+    String _initials;
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.fromLTRB(30, 15, 30, 0),
+          actionsPadding: EdgeInsets.only(right: 15),
+          content: TextFormField(
+            // autovalidate: _autoValidateEmail,
+            // validator: (email) =>
+            //     EmailValidator.validate(email) ? null : "Invalid email address",
+            onChanged: (initials) => _initials = initials,
+            style: TextStyle(fontSize: 25, color: Colors.black),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              icon: Icon(
+                Icons.person,
+                size: 30,
+                color: Colors.black,
+              ),
+              hintText: "Initials (eg. \"ERM\")",
+            ),
+          ),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            FlatButton(
+              child: new Text(
+                "Close",
+                style: TextStyle(fontSize: 20),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: new Text(
+                "Save",
+                style: TextStyle(fontSize: 20),
+              ),
+              onPressed: () {
+                //TODO handle empty submission
+                Navigator.of(context).pop(_initials.toUpperCase());
+              },
+            ),
+          ],
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        );
+      },
+    );
+  }
+
+  Column _buildRankRequirementCards(RankRequirementList rankRequirementList) {
     List<Widget> cards = [];
-    badgeRequirements.reqList.forEach((req) {
+    rankRequirementList.reqList.forEach((req) {
       List splitID = req.id.split(".");
       String newID = "";
       newID = splitID.length % 2 == 0
@@ -39,16 +92,15 @@ class _RankState extends State<Rank> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: Colors.white,
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //checkbox
-
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
@@ -62,16 +114,38 @@ class _RankState extends State<Rank> {
                     ),
                     ChangeNotifierProvider(
                       create: (context) => req,
-                      child: Consumer<BadgeRequirement>(
+                      child: Consumer<RankRequirement>(
                         builder: (context, req, child) {
                           if (req.isCheckable) {
-                            return CircularCheckBox(
-                              inactiveColor: Colors.redAccent[100],
-                              activeColor: Colors.greenAccent,
-                              checkColor: Colors.white,
-                              value: req.isComplete,
-                              onChanged: (bool newValue) =>
-                                  req.setIsComplete(newValue),
+                            return Column(
+                              children: [
+                                CircularCheckBox(
+                                    inactiveColor: Colors.redAccent[100],
+                                    activeColor: Colors.greenAccent,
+                                    checkColor: Colors.white,
+                                    value: req.isComplete,
+                                    onChanged: (bool newValue) async {
+                                      if (newValue) {
+                                        String initials =
+                                            await _showInitialsDialog();
+                                        if (initials != null) {
+                                          req.setInitials(initials);
+                                          req.setDate(DateTime.now());
+                                          req.setIsComplete(newValue);
+                                        }
+                                      } else {
+                                        req.setIsComplete(newValue);
+                                        req.setInitials(null);
+                                        req.setDate(null);
+                                      }
+                                    }),
+                                req.initials != null
+                                    ? Text(req.initials)
+                                    : Container(),
+                                req.date != null
+                                    ? Text(req.date.toString())
+                                    : Container(),
+                              ],
                             );
                           } else {
                             return Container(
@@ -87,7 +161,7 @@ class _RankState extends State<Rank> {
                                 onSelected: (_) {},
                                 selected: req.isComplete,
                                 label: Text(
-                                  '${req.subReqs.numChildrenComplete} / ${req.subReqs.numChildrenRequired}',
+                                  '${req.subReqs.numChildrenCompleted} / ${req.subReqs.numChildrenRequired}',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -120,7 +194,7 @@ class _RankState extends State<Rank> {
                 ? Container()
                 : Container(
                     margin: EdgeInsets.only(left: 30),
-                    child: _buildBadgeRequirementCards(req.subReqs, true),
+                    child: _buildRankRequirementCards(req.subReqs),
                   ),
           ],
         ),
@@ -130,196 +204,54 @@ class _RankState extends State<Rank> {
         crossAxisAlignment: CrossAxisAlignment.start, children: cards);
   }
 
+  // @override
+  // void initState() {
+  //   // final String uid = Provider.of<String>(context, listen: false);
+  //   // _loadingRequirements = widget.rankRequirementList;
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final String uid = Provider.of<String>(context);
+    super.build(context);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-
-      // body: Column(
-      //     children: [
-      //       Hero(
-      //         tag: widget.badgeName,
-      //         child: SvgPicture.asset(
-      //           'assets/images/badges/${widget.badgeName.toLowerCase().replaceAll(' ', '-')}.svg',
-      //           height: 70,
-      //           placeholderBuilder: (context) => Center(
-      //             child: SpinKitDoubleBounce(
-      //               color: Colors.redAccent[100],
-      //             ),
-      //           ),
-      //         ),
-      //       ),
-      body: Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            alignment: Alignment.topRight,
-            decoration: new BoxDecoration(
-              gradient: new LinearGradient(
-                colors: [
-                  Colors.amber[200],
-                  Colors.redAccent,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-                    child: Row(
-                      children: [
-                        MaterialButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          shape: CircleBorder(),
-                          height: 50,
-                          color: Colors.white24,
-                          elevation: 0,
-                          highlightElevation: 0,
-                          splashColor: Colors.redAccent[100],
-                          highlightColor: Colors.transparent,
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 35,
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white24,
+          borderRadius: BorderRadius.circular(30),
+          // borderRadius: BorderRadius.only(
+          //     topRight: Radius.circular(50),
+          //     topLeft: Radius.circular(50)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildRankRequirementCards(widget.rankRequirementList),
+              widget.rankRequirementList.note == null
+                  ? Container()
+                  : Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          widget.rankRequirementList.note,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
                           ),
                         ),
-                        Image.asset(
-                            'assets/images/badges/${widget.badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                            height: 60,
-                            errorBuilder: (context, error, stackTrace) {
-                          print(error.toString());
-                          return Icon(Icons.not_interested, size: 50);
-                        }),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: AutoSizeText(
-                            widget.badgeName,
-                            maxLines: 1,
-                            style: TextStyle(
-                              letterSpacing: 1,
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                          child: MaterialButton(
-                            onPressed: () async {
-                              DatabaseService database =
-                                  DatabaseService(uid: uid);
-                              database
-                                  .updateRequirementListDocument(
-                                      badgeRequirementList,
-                                      widget.badgeName
-                                          .toLowerCase()
-                                          .replaceAll(' ', '-')
-                                          .replaceAll(',', ''))
-                                  .whenComplete(() =>
-                                      database.updateBadgeProgressField(
-                                          widget.badgeName
-                                              .toLowerCase()
-                                              .replaceAll(' ', '-')
-                                              .replaceAll(',', ''),
-                                          badgeRequirementList));
-
-                              print('saved reqs');
-                            },
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            height: 50,
-                            color: Colors.white24,
-                            elevation: 0,
-                            highlightElevation: 0,
-                            splashColor: Colors.redAccent[100],
-                            highlightColor: Colors.transparent,
-                            child: Text(
-                              'Save',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  FutureBuilder(
-                    future: DatabaseService(uid: uid).getBadgeData(widget
-                        .badgeName
-                        .toLowerCase()
-                        .replaceAll(' ', '-')
-                        .replaceAll(',', '')),
-                    // DefaultAssetBundle.of(context)
-                    //     .loadString('data/golf_v1.json'),
-                    builder: (context, snapshot) {
-                      return AnimatedSwitcher(
-                          duration: Duration(milliseconds: 200),
-                          child: (() {
-                            if (snapshot.hasData) {
-                              badgeRequirementList = snapshot.data;
-
-                              return Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white24,
-                                    borderRadius: BorderRadius.circular(30),
-                                    // borderRadius: BorderRadius.only(
-                                    //     topRight: Radius.circular(50),
-                                    //     topLeft: Radius.circular(50)),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      _buildBadgeRequirementCards(
-                                          badgeRequirementList),
-                                      badgeRequirementList.note == null
-                                          ? Container()
-                                          : Padding(
-                                              padding: const EdgeInsets.all(8),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
-                                                  color: Colors.white,
-                                                ),
-                                                child: Text(
-                                                  badgeRequirementList.note,
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Container();
-                            }
-                          }()));
-                    },
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
