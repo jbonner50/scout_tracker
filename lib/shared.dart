@@ -28,3 +28,24 @@ Widget backgroundGradient(context) {
     ),
   );
 }
+
+Widget backgroundGradientWithCenterWidget(context, Widget centered) {
+  Size size = MediaQuery.of(context).size;
+  return Scaffold(
+    body: Container(
+      width: size.width,
+      height: size.height,
+      decoration: new BoxDecoration(
+        gradient: new LinearGradient(
+          colors: [
+            Colors.amber[200],
+            Colors.redAccent,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(child: centered),
+    ),
+  );
+}

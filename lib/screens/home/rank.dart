@@ -19,6 +19,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
 
   // Future _loadingRequirements;
 
+  RankRequirementList rankRequirementListModel;
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
   Future<String> _showInitialsDialog() {
@@ -36,7 +37,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
             // validator: (email) =>
             //     EmailValidator.validate(email) ? null : "Invalid email address",
             onChanged: (initials) => _initials = initials,
-            style: TextStyle(fontSize: 25, color: Colors.black),
+            style: TextStyle(fontSize: 24, color: Colors.black),
             decoration: InputDecoration(
               border: InputBorder.none,
               icon: Icon(
@@ -64,8 +65,8 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                 style: TextStyle(fontSize: 20),
               ),
               onPressed: () {
-                //TODO handle empty submission
-                Navigator.of(context).pop(_initials.toUpperCase());
+                Navigator.of(context)
+                    .pop(_initials.isEmpty ? null : _initials.toUpperCase());
               },
             ),
           ],
@@ -107,82 +108,130 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                         '$newID.',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    ChangeNotifierProvider(
-                      create: (context) => req,
-                      child: Consumer<RankRequirement>(
-                        builder: (context, req, child) {
-                          if (req.isCheckable) {
-                            return Column(
-                              children: [
-                                CircularCheckBox(
-                                    inactiveColor: Colors.redAccent[100],
-                                    activeColor: Colors.greenAccent,
-                                    checkColor: Colors.white,
-                                    value: req.isComplete,
-                                    onChanged: (bool newValue) async {
-                                      if (newValue) {
-                                        String initials =
-                                            await _showInitialsDialog();
-                                        if (initials != null) {
+
+                    (() {
+                      if (req.isCheckable) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularCheckBox(
+                                inactiveColor: Colors.redAccent[100],
+                                activeColor: Colors.greenAccent,
+                                checkColor: Colors.white,
+                                value: req.isComplete,
+                                onChanged: (bool newValue) async {
+                                  if (!req.textbox) {
+                                    if (newValue) {
+                                      String initials =
+                                          await _showInitialsDialog();
+                                      if (initials != null) {
+                                        setState(() {
                                           req.setInitials(initials);
-                                          req.setDate(DateTime.now());
                                           req.setIsComplete(newValue);
-                                        }
-                                      } else {
+                                          req.setDate(DateTime.now());
+                                        });
+                                      }
+                                    } else {
+                                      setState(() {
                                         req.setIsComplete(newValue);
                                         req.setInitials(null);
                                         req.setDate(null);
-                                      }
-                                    }),
-                                req.initials != null
-                                    ? Text(req.initials)
-                                    : Container(),
-                                req.date != null
-                                    ? Text(req.date.toString())
-                                    : Container(),
-                              ],
-                            );
-                          } else {
-                            return Container(
-                              margin: EdgeInsets.only(left: 5),
-                              constraints: BoxConstraints(minWidth: 60),
-                              alignment: Alignment.centerLeft,
-                              height: 50,
-                              child: FilterChip(
-                                pressElevation: 0,
-                                checkmarkColor: Colors.white,
-                                backgroundColor: Colors.redAccent[100],
-                                selectedColor: Colors.greenAccent,
-                                onSelected: (_) {},
-                                selected: req.isComplete,
-                                label: Text(
-                                  '${req.subReqs.numChildrenCompleted} / ${req.subReqs.numChildrenRequired}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                      });
+                                    }
+                                  } else {
+                                    if (!newValue) {
+                                      setState(() {
+                                        req.setIsComplete(newValue);
+                                        req.setText('');
+                                      });
+                                    }
+                                  }
+                                }),
+                            req.initials != null
+                                ? Text(req.initials)
+                                : Container(),
+                            req.date != null
+                                ? Text(req.date.toString())
+                                : Container(),
+                          ],
+                        );
+                      } else {
+                        return Container(
+                          margin: EdgeInsets.only(left: 5),
+                          constraints: BoxConstraints(minWidth: 60),
+                          height: 50,
+                          child: FilterChip(
+                            pressElevation: 0,
+                            checkmarkColor: Colors.white,
+                            backgroundColor: Colors.redAccent[100],
+                            selectedColor: Colors.greenAccent,
+                            onSelected: (_) {},
+                            selected: req.isComplete,
+                            label: Text(
+                              '${req.subReqs.numChildrenCompleted} / ${req.subReqs.numChildrenRequired}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
+                            ),
+                          ),
+                        );
+                      }
+                    }()),
+
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.all(8),
-                        child: Text(
-                          req.description,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              req.description,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                              ),
+                            ),
+                            if (req.textbox) ...[
+                              Container(
+                                margin: EdgeInsets.only(top: 8),
+                                height: 1,
+                                color: Colors.grey[400],
+                              ),
+                              TextFormField(
+                                initialValue: req.text,
+                                onChanged: (text) {
+                                  setState(() {
+                                    req.setText(text);
+                                    req.setIsComplete(text.isNotEmpty);
+                                  });
+                                },
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.black),
+                                decoration: InputDecoration(
+                                  icon: Text(
+                                    'Entry: ',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  // contentPadding: EdgeInsets.zero,
+                                  border: InputBorder.none,
+                                  hintText: "Edit data",
+                                ),
+                              )
+                            ] else
+                              Container(),
+                          ],
                         ),
                       ),
                     ),
@@ -212,6 +261,13 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
   // }
 
   @override
+  void initState() {
+    rankRequirementListModel = widget.rankRequirementList;
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
 
@@ -229,8 +285,8 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildRankRequirementCards(widget.rankRequirementList),
-              widget.rankRequirementList.note == null
+              _buildRankRequirementCards(rankRequirementListModel),
+              rankRequirementListModel.note == null
                   ? Container()
                   : Padding(
                       padding: const EdgeInsets.all(8),
@@ -241,7 +297,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                           color: Colors.white,
                         ),
                         child: Text(
-                          widget.rankRequirementList.note,
+                          rankRequirementListModel.note,
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 18,

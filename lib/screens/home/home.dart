@@ -3,6 +3,7 @@ import 'package:scout_tracker/screens/home/badges.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
 import 'package:scout_tracker/screens/home/ranks.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:scout_tracker/services/auth.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // Container(key: ValueKey(1)),
     Ranks(key: ValueKey(1)),
     Badges(key: ValueKey(2)),
-    Profile(key: ValueKey(3)),
+    //Profile(key: ValueKey(3)),
   ];
 
   @override
@@ -66,13 +67,69 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         //   elevation: 0,
         //   backgroundColor: Colors.white12,
         // ),
-        body: SafeArea(
-          child:
-              // AnimatedSwitcher(
-              //     duration: Duration(milliseconds: 200),
-              //     child:
-              _tabs.elementAt(_selectedIndex),
+        appBar: AppBar(
+          brightness: Brightness.dark,
+          backgroundColor: Colors.transparent,
+          bottom: PreferredSize(
+            child: Container(
+              height: 1,
+              color: Colors.white60,
+            ),
+            preferredSize: Size.fromHeight(1.0),
+          ),
+          elevation: 0,
+          title: Text(
+            'Scout Tracker',
+            style: TextStyle(
+                fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: 1),
+          ),
         ),
+        drawer: Drawer(
+          child: SafeArea(
+            child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              children: <Widget>[
+                DrawerHeader(
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('assets/images/scout.png'),
+                                fit: BoxFit.contain)),
+                      ),
+                      Text(
+                        'Scout Tracker',
+                        style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  title: Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 20,
+                      // fontWeight: FontWeight.bold,
+                      // letterSpacing: 1),
+                    ),
+                  ),
+                  onTap: () => AuthService().logout(),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body:
+            // AnimatedSwitcher(
+            //     duration: Duration(milliseconds: 200),
+            //     child:
+            _tabs.elementAt(_selectedIndex),
 
         // floatingActionButton: SpeedDial(
         //   backgroundColor: Colors.white,
@@ -134,11 +191,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           selectedItemColor: Colors.redAccent[100],
           items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.keyboard_capslock), title: Text('Rank')),
+                icon: Icon(Icons.keyboard_capslock), title: Text('Ranks')),
             BottomNavigationBarItem(
                 icon: Icon(Icons.toll), title: Text('Badges')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline), title: Text('Profile')),
+            // BottomNavigationBarItem(
+            //     icon: Icon(Icons.person_outline), title: Text('Profile')),
           ],
         )
         // Container(

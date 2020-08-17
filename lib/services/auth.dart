@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/services.dart';
 import 'package:scout_tracker/services/database.dart';
+import 'package:scout_tracker/services/storage.dart';
 
 enum AuthResultStatus {
   successful,
@@ -20,8 +24,7 @@ class AuthService {
 
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
 
-  Future<AuthResultStatus> register(
-      {String email, String pass, String rank}) async {
+  Future<AuthResultStatus> register({String email, String pass}) async {
     try {
       AuthResult authResult = await _auth.createUserWithEmailAndPassword(
           email: email, password: pass);
@@ -30,7 +33,7 @@ class AuthService {
         FirebaseUser user = authResult.user;
         // create a new document for the user with the uid
         String username = email.split('@')[0];
-        await DatabaseService(uid: user.uid).createScout(username, rank);
+        await DatabaseService(uid: user.uid).createScout(username);
       } else {
         _status = AuthResultStatus.undefined;
       }
@@ -58,8 +61,9 @@ class AuthService {
     return _status;
   }
 
-  logout() {
-    _auth.signOut();
+  Future<void> logout() async {
+    // await _auth.signOut().catchError((error) => print(error.toString()));
+    await _auth.signOut();
   }
 }
 

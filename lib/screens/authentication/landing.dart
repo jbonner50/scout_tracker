@@ -33,21 +33,29 @@ class _LandingState extends State<Landing> {
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildScoutPicture(),
-                      Text(
-                        'Scout Tracker',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 45,
-                            letterSpacing: 1,
-                            color: Colors.white),
+                      Flexible(
+                        child: _buildScoutPicture(),
                       ),
-                      SizedBox(height: 15),
-                      _buildTabBar(),
-                      SizedBox(height: 5),
-                      Expanded(child: _buildTabBarView()),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Scout Tracker',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 45,
+                              letterSpacing: 1,
+                              color: Colors.white),
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: _buildTabBar(),
+                      ),
+
+                      Flexible(flex: 3, child: _buildTabBarView()),
                       // _buildTabBarView(),
                     ],
                   ),

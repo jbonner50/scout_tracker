@@ -122,17 +122,20 @@ class _BadgesState extends State<Badges> {
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset(
-                        'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                        height: 70, errorBuilder: (context, error, stackTrace) {
-                      print(error.toString());
-                      return Icon(Icons.not_interested, size: 50);
-                    }),
-                    Expanded(
+                    Flexible(
+                      flex: 2,
+                      child: Image.asset(
+                          'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                          errorBuilder: (context, error, stackTrace) {
+                        print(error.toString());
+                        return Icon(Icons.not_interested);
+                      }),
+                    ),
+                    Flexible(
                       child: Align(
                         alignment: Alignment.center,
                         child: AutoSizeText(
@@ -144,28 +147,29 @@ class _BadgesState extends State<Badges> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 4),
-                    LinearPercentIndicator(
-                      percent: progress,
-                      lineHeight: 10,
-                      linearGradient: new LinearGradient(
-                        colors: [
-                          Colors.amber[200],
-                          Colors.redAccent,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      backgroundColor: Colors.grey[200],
-                      clipLinearGradient: true,
-                      trailing: Container(
-                        margin: EdgeInsets.only(left: 4),
-                        child: Text(
-                          '${(progress * 100).truncate()}%',
-                          style: TextStyle(
-                              color: Colors.redAccent[100],
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
+                    Flexible(
+                      child: LinearPercentIndicator(
+                        percent: progress,
+                        lineHeight: 10,
+                        linearGradient: new LinearGradient(
+                          colors: [
+                            Colors.amber[200],
+                            Colors.redAccent,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        backgroundColor: Colors.grey[200],
+                        clipLinearGradient: true,
+                        trailing: Container(
+                          margin: EdgeInsets.only(left: 4),
+                          child: Text(
+                            '${(progress * 100).truncate()}%',
+                            style: TextStyle(
+                                color: Colors.redAccent[100],
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
@@ -274,6 +278,7 @@ class _BadgesState extends State<Badges> {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               sliver: SliverAppBar(
+                automaticallyImplyLeading: false,
                 // forceElevated: value,
                 backgroundColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
@@ -298,7 +303,7 @@ class _BadgesState extends State<Badges> {
                           child: TextField(
                             controller: _searchController,
                             onChanged: onSearchChanged,
-                            style: TextStyle(fontSize: 25, color: Colors.black),
+                            style: TextStyle(fontSize: 30, color: Colors.black),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: "Search Badges",
@@ -432,14 +437,7 @@ class _BadgesState extends State<Badges> {
                 ],
               );
             } else {
-              return TabBarView(
-                children: [
-                  _buildBadges(BadgeList.all),
-                  _buildBadges(BadgeList.inprogress),
-                  _buildBadges(BadgeList.earned),
-                  _buildBadges(BadgeList.unearned),
-                ],
-              );
+              return Container();
             }
           },
         ),

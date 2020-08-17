@@ -47,14 +47,13 @@ class _BadgeState extends State<Badge> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //checkbox
-
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         '$newID.',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -299,7 +298,7 @@ class _BadgeState extends State<Badge> {
                                                   badgeRequirementList.note,
                                                   style: TextStyle(
                                                     color: Colors.black,
-                                                    fontSize: 18,
+                                                    fontSize: 24,
                                                   ),
                                                 ),
                                               ),

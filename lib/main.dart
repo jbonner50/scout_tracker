@@ -52,10 +52,11 @@ class MyApp extends StatelessWidget {
       value: AuthService().user.map((user) => user?.uid),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
-            systemNavigationBarColor: Colors.white,
-            systemNavigationBarIconBrightness: Brightness.dark,
-            statusBarColor: Colors.white12,
-            statusBarIconBrightness: Brightness.light),
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          // statusBarColor: Colors.white,
+          // statusBarIconBrightness: Brightness.dark,
+        ),
         child: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (overscroll) {
             overscroll.disallowGlow();

@@ -175,6 +175,11 @@ class RankRequirement extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setText(String text) {
+    this.text = text;
+    notifyListeners();
+  }
+
   void setDate(DateTime datetime) {
     this.date = datetime == null ? null : Date.fromDateTime(datetime);
     notifyListeners();
@@ -193,7 +198,9 @@ class RankRequirement extends ChangeNotifier {
     this.id = req["req"];
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = false;
-    this.textbox = req["textbox"];
+    this.textbox = req.containsKey("textbox");
+
+    this.text = '';
     this.description = req["text"];
     this.subReqs = req["sub_reqs"].length == 0
         ? null
@@ -209,7 +216,7 @@ class RankRequirement extends ChangeNotifier {
     this.id = req["req"];
     this.isCheckable = req["sub_reqs"].length == 0;
     this.isComplete = firestoreData["is_complete"];
-    this.textbox = req["textbox"];
+    this.textbox = req.containsKey("textbox");
     this.text = firestoreData["text"];
     this.initials = firestoreData["initials"];
     this.date = firestoreData["date"] == null

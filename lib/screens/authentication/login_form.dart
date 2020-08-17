@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:scout_tracker/services/auth.dart';
+import 'package:scout_tracker/services/storage.dart';
 
-enum Progress { button, loading, success }
+enum Progress { button, loading }
 
 class LoginForm extends StatefulWidget {
   @override
@@ -28,16 +31,6 @@ class _LoginFormState extends State<LoginForm> {
       case Progress.loading:
         return SpinKitThreeBounce(
           color: Colors.redAccent[100],
-        );
-      case Progress.success:
-        return Container(
-          key: ValueKey(2),
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.greenAccent,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.check, color: Colors.white, size: 40),
         );
       default:
         return Container(
@@ -87,14 +80,13 @@ class _LoginFormState extends State<LoginForm> {
                   print(_email);
                   print(_pass);
                   setState(() => _progress = Progress.loading);
-                  AuthResultStatus status =
-                      await AuthService().login(email: _email, pass: _pass);
-                  if (status == AuthResultStatus.successful) {
-                    setState(() => _progress = Progress.success);
-                  } else {
-                    // TODO give an error message
-                    setState(() => _progress = Progress.button);
-                  }
+                  await AuthService()
+                      .login(email: _email, pass: _pass)
+                      .then((AuthResultStatus status) {
+                    if (status != AuthResultStatus.successful) {
+                      setState(() => _progress = Progress.button);
+                    }
+                  });
                 } else {
                   print('invalid');
                   setState(() {
@@ -203,7 +195,7 @@ class _LoginFormState extends State<LoginForm> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(30),
             color: Colors.white,
             boxShadow: [
               BoxShadow(

@@ -51,7 +51,6 @@ class _RanksState extends State<Ranks> {
   @override
   void initState() {
     final String uid = Provider.of<String>(context, listen: false);
-
     Map<String, Future<RankRequirementList>> rankFirestore = Map.fromIterable(
         rankNames,
         key: (k) => k,
@@ -106,6 +105,7 @@ class _RanksState extends State<Ranks> {
                       SliverPadding(
                         padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                         sliver: SliverAppBar(
+                          automaticallyImplyLeading: false,
                           // forceElevated: value,
                           backgroundColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
@@ -131,7 +131,7 @@ class _RanksState extends State<Ranks> {
                                     currentRank,
                                     style: TextStyle(
                                       fontSize: 30,
-                                      fontWeight: FontWeight.bold,
+                                      // fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Spacer(),

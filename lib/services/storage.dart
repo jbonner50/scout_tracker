@@ -32,19 +32,19 @@ class StorageService {
   }
 
   Future<void> saveBadgeJson(String hyphenatedBadgeName) async {
-    dynamic badgeData = await getBadgeJson(hyphenatedBadgeName);
+    final directory = await getApplicationDocumentsDirectory();
+    File badgeFile = File('${directory.path}/badges/$hyphenatedBadgeName.json');
+    if (!badgeFile.existsSync()) {
+      //   //add new loadout to file
+      //   badgeFile.writeAsString(json.encode(badgeData));
+      // } else {
+      //create file and add new loadout as first entry
+      dynamic badgeData = await getBadgeJson(hyphenatedBadgeName);
 
-    if (badgeData != null) {
-      //TODO add check to see if files exist
+      if (badgeData != null) {
+        //TODO add check to see if files exist
 
-      final directory = await getApplicationDocumentsDirectory();
-      File badgeFile =
-          File('${directory.path}/badges/$hyphenatedBadgeName.json');
-      if (badgeFile.existsSync()) {
-        //add new loadout to file
-        badgeFile.writeAsString(json.encode(badgeData));
-      } else {
-        //create file and add new loadout as first entry
+        print('created');
         badgeFile.createSync(recursive: true);
         badgeFile.writeAsStringSync(json.encode(badgeData));
       }
@@ -96,18 +96,18 @@ class StorageService {
   }
 
   Future<void> saveRankJson(String hyphenatedRankName) async {
-    dynamic rankData = await getRankJson(hyphenatedRankName);
+    final directory = await getApplicationDocumentsDirectory();
+    File rankFile = File('${directory.path}/ranks/$hyphenatedRankName.json');
+    if (!rankFile.existsSync()) {
+      //   //add new loadout to file
+      //   rankFile.writeAsString(json.encode(rankData));
+      // } else {
+      //create file and add new loadout as first entry
+      dynamic rankData = await getRankJson(hyphenatedRankName);
 
-    if (rankData != null) {
-      //TODO add check to see if files exist
-
-      final directory = await getApplicationDocumentsDirectory();
-      File rankFile = File('${directory.path}/ranks/$hyphenatedRankName.json');
-      if (rankFile.existsSync()) {
-        //add new loadout to file
-        rankFile.writeAsString(json.encode(rankData));
-      } else {
-        //create file and add new loadout as first entry
+      if (rankData != null) {
+        //TODO add check to see if files exist
+        print('created');
         rankFile.createSync(recursive: true);
         rankFile.writeAsStringSync(json.encode(rankData));
       }
