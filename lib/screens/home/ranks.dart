@@ -202,15 +202,15 @@ class _RanksState extends State<Ranks> {
                                   borderRadius: BorderRadius.circular(30),
                                   color: Colors.redAccent[100],
                                 ),
-                                tabs: [
-                                  Tab(icon: rankIcons[0]),
-                                  Tab(icon: rankIcons[1]),
-                                  Tab(icon: rankIcons[2]),
-                                  Tab(icon: rankIcons[3]),
-                                  Tab(icon: rankIcons[4]),
-                                  Tab(icon: rankIcons[5]),
-                                  Tab(icon: rankIcons[6]),
-                                ],
+                                tabs: rankNames.map((name) {
+                                  String hyphenatedRankName =
+                                      name.toLowerCase().replaceAll(' ', '-');
+                                  return Tab(
+                                    child: Image.asset(
+                                      'assets/images/ranks/$hyphenatedRankName.png',
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ),
                           ),
