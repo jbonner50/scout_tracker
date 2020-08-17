@@ -10,15 +10,15 @@ import 'package:scout_tracker/models/badge_requirements.dart';
 import 'package:scout_tracker/services/database.dart';
 import 'package:scout_tracker/services/storage.dart';
 
-class Badge extends StatefulWidget {
+class BadgeDetails extends StatefulWidget {
   final String badgeName;
-  Badge({this.badgeName});
+  BadgeDetails({this.badgeName});
 
   @override
-  _BadgeState createState() => _BadgeState();
+  _BadgeDetailsState createState() => _BadgeDetailsState();
 }
 
-class _BadgeState extends State<Badge> {
+class _BadgeDetailsState extends State<BadgeDetails> {
   BadgeRequirementList badgeRequirementList;
 
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';

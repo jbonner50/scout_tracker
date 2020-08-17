@@ -22,28 +22,19 @@ class BadgeRequirementList {
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getTotalSubReqsCompleted(BadgeRequirementList badgeReqList) {
-    double require = badgeReqList.numChildrenCompleted.toDouble();
-    for (var req in badgeReqList.reqList) {
-      if (req.subReqs != null) {
-        require += getTotalSubReqsCompleted(req.subReqs);
+  double getRequirementProgress(BadgeRequirementList badgeReqList) {
+    if (badgeReqList.subReqsComplete) {
+      return 1;
+    } else {
+      double require = badgeReqList.numChildrenRequired.toDouble();
+      for (var req in badgeReqList.reqList) {
+        if (req.subReqs != null) {
+          require += getTotalSubReqsRequired(req.subReqs);
+        }
       }
     }
     return require;
   }
-
-  double getTotalSubReqsRequired(BadgeRequirementList badgeReqList) {
-    double require = badgeReqList.numChildrenRequired.toDouble();
-    for (var req in badgeReqList.reqList) {
-      if (req.subReqs != null) {
-        require += getTotalSubReqsRequired(req.subReqs);
-      }
-    }
-    return require;
-  }
-
-  double get requirementProgress =>
-      getTotalSubReqsCompleted(this) / getTotalSubReqsRequired(this);
 
   // convert reqList to a map for firestore (recursive)
   Map<String, dynamic> convertReqListToFirestore() {

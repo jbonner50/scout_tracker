@@ -18,18 +18,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget _icon = Icon(Icons.add);
 
-  List<Widget> _tabs = [
-    // Container(key: ValueKey(1)),
-    Ranks(key: ValueKey(1)),
-    Badges(key: ValueKey(2)),
-    //Profile(key: ValueKey(3)),
-  ];
+  List<Widget> _tabs;
+
+  void showDrawer() {
+    print('test');
+    Scaffold.of(context).openDrawer();
+  }
 
   @override
   void initState() {
     // _tabController = TabController(length: 3, vsync: this);
     // _tabController.animation.addListener(() => _handleTabChange());
-
+    _tabs = [
+      Ranks(key: ValueKey(1), showDrawer: showDrawer),
+      Badges(key: ValueKey(2), showDrawer: showDrawer),
+    ];
     super.initState();
   }
 
@@ -67,23 +70,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         //   elevation: 0,
         //   backgroundColor: Colors.white12,
         // ),
-        appBar: AppBar(
-          brightness: Brightness.dark,
-          backgroundColor: Colors.transparent,
-          bottom: PreferredSize(
-            child: Container(
-              height: 1,
-              color: Colors.white60,
-            ),
-            preferredSize: Size.fromHeight(1.0),
-          ),
-          elevation: 0,
-          title: Text(
-            'Scout Tracker',
-            style: TextStyle(
-                fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: 1),
-          ),
-        ),
+        // appBar: AppBar(
+        //   brightness: Brightness.dark,
+        //   backgroundColor: Colors.transparent,
+        //   bottom: PreferredSize(
+        //     child: Container(
+        //       height: 1,
+        //       color: Colors.white60,
+        //     ),
+        //     preferredSize: Size.fromHeight(1.0),
+        //   ),
+        //   elevation: 0,
+        //   title: Text(
+        //     'Scout Tracker',
+        //     style: TextStyle(
+        //         fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: 1),
+        //   ),
+        // ),
         drawer: Drawer(
           child: SafeArea(
             child: ListView(

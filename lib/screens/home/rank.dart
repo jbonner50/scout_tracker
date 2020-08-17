@@ -7,7 +7,7 @@ import 'package:scout_tracker/services/database.dart';
 class Rank extends StatefulWidget {
   // final String hyphenatedRankName;
   final RankRequirementList rankRequirementList;
-  Rank({this.rankRequirementList});
+  Rank({Key key, this.rankRequirementList}) : super(key: key);
 
   @override
   _RankState createState() => _RankState();
@@ -282,30 +282,33 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
           //     topRight: Radius.circular(50),
           //     topLeft: Radius.circular(50)),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildRankRequirementCards(rankRequirementListModel),
-              rankRequirementListModel.note == null
-                  ? Container()
-                  : Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.white,
-                        ),
-                        child: Text(
-                          rankRequirementListModel.note,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildRankRequirementCards(rankRequirementListModel),
+                rankRequirementListModel.note == null
+                    ? Container()
+                    : Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: Colors.white,
+                          ),
+                          child: Text(
+                            rankRequirementListModel.note,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
