@@ -129,7 +129,7 @@ class _LandingState extends State<Landing> {
             top: 50,
             width: 250,
             child: Image.asset(
-              'assets/images/scout.png',
+              'assets/images/scout_logo.png',
             ),
           ),
           Positioned(

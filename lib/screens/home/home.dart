@@ -97,7 +97,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         height: 100,
                         decoration: BoxDecoration(
                             image: DecorationImage(
-                                image: AssetImage('assets/images/scout.png'),
+                                image:
+                                    AssetImage('assets/images/scout_logo.png'),
                                 fit: BoxFit.contain)),
                       ),
                       Text(
