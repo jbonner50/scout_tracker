@@ -35,7 +35,7 @@ class _BadgesState extends State<Badges> {
   }
 
   int _currentFilterIndex = 0;
-  Map<String, Widget> _filters = {
+  Map<String, Widget> _progressIndicators = {
     'All': Icon(
       Icons.all_inclusive,
       // color: Colors.black,
@@ -128,9 +128,11 @@ class _BadgesState extends State<Badges> {
                       padding: const EdgeInsets.all(8.0),
                       child: (() {
                         if (progress == 1) {
-                          return _filters['Completed'];
+                          return _progressIndicators['Completed'];
                         } else if (progress == 0.5) {
-                          return _filters['In Progress'];
+                          return _progressIndicators['In Progress'];
+                        } else {
+                          return Container();
                         }
                       }()),
                     ),
@@ -244,14 +246,14 @@ class _BadgesState extends State<Badges> {
           child: DropdownButton(
             iconEnabledColor: Colors.redAccent[100],
             value: _currentFilterIndex,
-            items: _filters.keys.map((filter) {
+            items: _progressIndicators.keys.map((filter) {
               return DropdownMenuItem(
-                value: _filters.keys.toList().indexOf(filter),
+                value: _progressIndicators.keys.toList().indexOf(filter),
                 child: Text(
                   filter,
                   style: TextStyle(
                       color: _currentFilterIndex ==
-                              _filters.keys.toList().indexOf(filter)
+                              _progressIndicators.keys.toList().indexOf(filter)
                           ? Colors.redAccent[100]
                           : Colors.black,
                       fontSize: 24,
@@ -322,9 +324,10 @@ class _BadgesState extends State<Badges> {
       // ),
 
       body: FutureBuilder(
-        future: _setBadgeLists(),
-        builder: (context, snapshot) => snapshot.hasData
-            ? StreamBuilder(
+          future: _setBadgeLists(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return StreamBuilder(
                 stream: DatabaseService(uid: uid).user,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
@@ -348,15 +351,19 @@ class _BadgesState extends State<Badges> {
                     }
 
                     return _buildBadges(
-                        _filters.keys.toList().elementAt(_currentFilterIndex),
+                        _progressIndicators.keys
+                            .toList()
+                            .elementAt(_currentFilterIndex),
                         filteredBadges);
                   } else {
                     return Container();
                   }
                 },
-              )
-            : Container(),
-      ),
+              );
+            } else {
+              return Container();
+            }
+          }),
     );
   }
 }

@@ -80,7 +80,6 @@ class DatabaseService {
     Map progress = user.data['rank_progress'];
     progress.update(hyphenatedRankName,
         (_) => rankRequirementList.getRequirementProgress());
-
     return scoutCollection.document(uid).setData({
       'rank_progress': progress,
     }, merge: true);

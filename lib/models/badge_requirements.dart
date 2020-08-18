@@ -38,6 +38,7 @@ class BadgeRequirementList {
         break;
       } else if (req.subReqs != null) {
         inprogress = checkInProgress(req.subReqs);
+        if (inprogress) break;
       }
     }
     return inprogress;

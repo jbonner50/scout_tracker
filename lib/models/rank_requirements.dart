@@ -47,6 +47,7 @@ class RankRequirementList {
     if (this.subReqsComplete) {
       return 1;
     } else {
+      print(checkInProgress(this));
       return checkInProgress(this) ? 0.5 : 0;
     }
   }
@@ -59,6 +60,7 @@ class RankRequirementList {
         break;
       } else if (req.subReqs != null) {
         inprogress = checkInProgress(req.subReqs);
+        if (inprogress) break;
       }
     }
     return inprogress;

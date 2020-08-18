@@ -17,7 +17,6 @@ class Ranks extends StatefulWidget {
 
 class _RanksState extends State<Ranks> {
   int _currentRankIndex = 0;
-  bool changesSaved = true;
   final List<String> rankNames = [
     'Scout',
     'Tenderfoot',
@@ -27,6 +26,40 @@ class _RanksState extends State<Ranks> {
     'Life',
     'Eagle',
   ];
+
+  final List<bool> _changesSaved = [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+  ];
+
+  void setChangesSaved(bool newValue) {
+    print('worked');
+    setState(() => _changesSaved[_currentRankIndex] = newValue);
+  }
+
+  Map<String, Widget> _progressIndicators = {
+    'All': Icon(
+      Icons.all_inclusive,
+      // color: Colors.black,
+    ),
+    'In Progress': Icon(
+      Icons.hourglass_full, color: Colors.amberAccent,
+      // color: Colors.amberAccent,
+    ),
+    'Completed': Icon(
+      Icons.check_circle, color: Colors.greenAccent,
+      // color: Colors.greenAccent,
+    ),
+    'Not Started': Icon(
+      Icons.cancel, color: Colors.redAccent,
+      // color: Colors.redAccent,
+    ),
+  };
 
   Map<String, Future<RankRequirementList>> rankFirestore;
   List<Future<Rank>> listFuturesRanks;
@@ -53,7 +86,9 @@ class _RanksState extends State<Ranks> {
     listFuturesRanks = rankFirestore.values
         .map((Future<RankRequirementList> futureReqList) async {
       return Rank(
-          key: ValueKey(index++), rankRequirementList: await futureReqList);
+          key: ValueKey(index++),
+          rankRequirementList: await futureReqList,
+          setChangesSaved: setChangesSaved);
     }).toList();
     // futureListRanks = listFuturesToFutureList(listFuturesRanks);
     super.initState();
@@ -89,28 +124,86 @@ class _RanksState extends State<Ranks> {
               backgroundColor: Colors.white,
               elevation: 0,
               title: DropdownButtonHideUnderline(
-                child: DropdownButton(
-                  iconEnabledColor: Colors.redAccent[100],
-                  value: _currentRankIndex,
-                  items: rankNames.map((rankName) {
-                    return DropdownMenuItem(
-                      value: rankNames.indexOf(rankName),
-                      child: Text(
-                        rankName,
-                        style: TextStyle(
-                            color:
-                                _currentRankIndex == rankNames.indexOf(rankName)
-                                    ? Colors.redAccent[100]
-                                    : Colors.black,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (val) => setState(() => _currentRankIndex = val),
-                ),
+                child: StreamBuilder(
+                    stream: DatabaseService(uid: uid).user,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        Map data = Map.from(snapshot.data['rank_progress']);
+                        return DropdownButton(
+                          iconEnabledColor: Colors.redAccent[100],
+                          value: _currentRankIndex,
+                          // selectedItemBuilder: (BuildContext context) {
+                          //   return rankNames.map((String rankName) {
+                          //     return Row(
+                          //       // mainAxisSize: MainAxisSize.min,
+                          //       mainAxisAlignment:
+                          //           MainAxisAlignment.spaceBetween,
+                          //       children: [
+                          //         Text(
+                          //           rankName,
+                          //           style: TextStyle(
+                          //               color: _currentRankIndex ==
+                          //                       rankNames.indexOf(rankName)
+                          //                   ? Colors.redAccent[100]
+                          //                   : Colors.black,
+                          //               fontSize: 24,
+                          //               fontWeight: FontWeight.bold,
+                          //               letterSpacing: 1),
+                          //         ),
+                          //         // SizedBox(width: 10),
+                          //         Icon(
+                          //           Icons.ac_unit,
+                          //           color: Colors.blue,
+                          //         ),
+                          //       ],
+                          //     );
+                          //   }).toList();
+                          // },
+                          items: rankNames.map((rankName) {
+                            double _progress = data[
+                                    rankName.toLowerCase().replaceAll(' ', '-')]
+                                .toDouble();
+
+                            return DropdownMenuItem(
+                              value: rankNames.indexOf(rankName),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    rankName,
+                                    style: TextStyle(
+                                        color: _currentRankIndex ==
+                                                rankNames.indexOf(rankName)
+                                            ? Colors.redAccent[100]
+                                            : Colors.black,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1),
+                                  ),
+                                  SizedBox(width: 10),
+                                  (() {
+                                    // print(_progress);
+                                    if (_progress == 1) {
+                                      return _progressIndicators['Completed'];
+                                    } else if (_progress == 0.5) {
+                                      return _progressIndicators['In Progress'];
+                                    } else {
+                                      return Container();
+                                    }
+                                  }()),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) =>
+                              setState(() => _currentRankIndex = val),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
               ),
+
               actions: [
                 Container(
                   margin: EdgeInsets.only(right: 10),
@@ -119,7 +212,7 @@ class _RanksState extends State<Ranks> {
                     checkmarkColor: Colors.white,
                     backgroundColor: Colors.redAccent[100],
                     selectedColor: Colors.greenAccent,
-                    selected: changesSaved,
+                    selected: _changesSaved[_currentRankIndex],
                     onSelected: (newValue) async {
                       if (newValue) {
                         DatabaseService database = DatabaseService(uid: uid);
@@ -140,10 +233,11 @@ class _RanksState extends State<Ranks> {
                                     snapshot.data.rankRequirementList));
                         print(_currentRankIndex);
                         print('saved reqs');
+                        setChangesSaved(true);
                       }
                     },
                     label: Text(
-                      changesSaved ? 'Saved' : 'Save Changes',
+                      _changesSaved[_currentRankIndex] ? 'Saved' : 'Save',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,

@@ -7,7 +7,9 @@ import 'package:scout_tracker/services/database.dart';
 class Rank extends StatefulWidget {
   // final String hyphenatedRankName;
   final RankRequirementList rankRequirementList;
-  Rank({Key key, this.rankRequirementList}) : super(key: key);
+  final Function(bool) setChangesSaved;
+  Rank({Key key, this.rankRequirementList, this.setChangesSaved})
+      : super(key: key);
 
   @override
   _RankState createState() => _RankState();
@@ -23,7 +25,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
   Future<String> _showInitialsDialog() {
-    String _initials;
+    String _initials = '';
 
     return showDialog(
       context: context,
@@ -33,9 +35,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
           contentPadding: EdgeInsets.fromLTRB(30, 15, 30, 0),
           actionsPadding: EdgeInsets.only(right: 15),
           content: TextFormField(
-            // autovalidate: _autoValidateEmail,
-            // validator: (email) =>
-            //     EmailValidator.validate(email) ? null : "Invalid email address",
+            maxLength: 3,
             onChanged: (initials) => _initials = initials,
             style: TextStyle(fontSize: 24, color: Colors.black),
             decoration: InputDecoration(
@@ -135,6 +135,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                                           req.setIsComplete(newValue);
                                           req.setDate(DateTime.now());
                                         });
+                                        widget.setChangesSaved(false);
                                       }
                                     } else {
                                       setState(() {
@@ -142,6 +143,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                                         req.setInitials(null);
                                         req.setDate(null);
                                       });
+                                      widget.setChangesSaved(false);
                                     }
                                   } else {
                                     if (!newValue) {
@@ -149,6 +151,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                                         req.setIsComplete(newValue);
                                         req.setText('');
                                       });
+                                      widget.setChangesSaved(false);
                                     }
                                   }
                                 }),
@@ -212,6 +215,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                                     req.setText(text);
                                     req.setIsComplete(text.isNotEmpty);
                                   });
+                                  widget.setChangesSaved(false);
                                 },
                                 style: TextStyle(
                                     fontSize: 24, color: Colors.black),
