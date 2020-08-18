@@ -67,8 +67,8 @@ class DatabaseService {
       BadgeRequirementList badgeRequirementList) async {
     DocumentSnapshot user = await scoutCollection.document(uid).get();
     Map progress = user.data['badge_progress'];
-    progress.update(
-        hyphenatedBadgeName, (_) => badgeRequirementList.requirementProgress);
+    progress.update(hyphenatedBadgeName,
+        (_) => badgeRequirementList.getRequirementProgress());
     return scoutCollection.document(uid).setData({
       'badge_progress': progress,
     }, merge: true);
@@ -78,10 +78,8 @@ class DatabaseService {
       RankRequirementList rankRequirementList) async {
     DocumentSnapshot user = await scoutCollection.document(uid).get();
     Map progress = user.data['rank_progress'];
-    print(rankRequirementList.getTotalSubReqsCompleted(rankRequirementList));
-    print(rankRequirementList.getTotalSubReqsRequired(rankRequirementList));
-    progress.update(
-        hyphenatedRankName, (_) => rankRequirementList.requirementProgress);
+    progress.update(hyphenatedRankName,
+        (_) => rankRequirementList.getRequirementProgress());
 
     return scoutCollection.document(uid).setData({
       'rank_progress': progress,

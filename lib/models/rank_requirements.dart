@@ -43,28 +43,26 @@ class RankRequirementList {
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getTotalSubReqsCompleted(RankRequirementList rankReqList) {
-    double require = rankReqList.numChildrenCompleted.toDouble();
-    for (var req in rankReqList.reqList) {
-      if (req.subReqs != null) {
-        require += getTotalSubReqsCompleted(req.subReqs);
-      }
+  double getRequirementProgress() {
+    if (this.subReqsComplete) {
+      return 1;
+    } else {
+      return checkInProgress(this) ? 0.5 : 0;
     }
-    return require;
   }
 
-  double getTotalSubReqsRequired(RankRequirementList rankReqList) {
-    double require = rankReqList.numChildrenRequired.toDouble();
-    for (var req in rankReqList.reqList) {
-      if (req.subReqs != null) {
-        require += getTotalSubReqsRequired(req.subReqs);
+  bool checkInProgress(RankRequirementList badgeReqList) {
+    bool inprogress = false;
+    for (var req in badgeReqList.reqList) {
+      if (req.isComplete) {
+        inprogress = true;
+        break;
+      } else if (req.subReqs != null) {
+        inprogress = checkInProgress(req.subReqs);
       }
     }
-    return require;
+    return inprogress;
   }
-
-  double get requirementProgress =>
-      getTotalSubReqsCompleted(this) / getTotalSubReqsRequired(this);
 
 // convert reqList to a map for firestore (recursive)
   Map<String, dynamic> convertReqListToFirestore() {

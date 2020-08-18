@@ -22,18 +22,25 @@ class BadgeRequirementList {
     parent?.setIsComplete(this.subReqsComplete);
   }
 
-  double getRequirementProgress(BadgeRequirementList badgeReqList) {
-    if (badgeReqList.subReqsComplete) {
+  double getRequirementProgress() {
+    if (this.subReqsComplete) {
       return 1;
     } else {
-      double require = badgeReqList.numChildrenRequired.toDouble();
-      for (var req in badgeReqList.reqList) {
-        if (req.subReqs != null) {
-          require += getTotalSubReqsRequired(req.subReqs);
-        }
+      return checkInProgress(this) ? 0.5 : 0;
+    }
+  }
+
+  bool checkInProgress(BadgeRequirementList badgeReqList) {
+    bool inprogress = false;
+    for (var req in badgeReqList.reqList) {
+      if (req.isComplete) {
+        inprogress = true;
+        break;
+      } else if (req.subReqs != null) {
+        inprogress = checkInProgress(req.subReqs);
       }
     }
-    return require;
+    return inprogress;
   }
 
   // convert reqList to a map for firestore (recursive)

@@ -41,15 +41,15 @@ class _BadgesState extends State<Badges> {
       // color: Colors.black,
     ),
     'In Progress': Icon(
-      Icons.hourglass_empty,
+      Icons.hourglass_full, color: Colors.amberAccent,
       // color: Colors.amberAccent,
     ),
     'Completed': Icon(
-      Icons.check,
+      Icons.check_circle, color: Colors.greenAccent,
       // color: Colors.greenAccent,
     ),
     'Not Started': Icon(
-      Icons.clear,
+      Icons.cancel, color: Colors.redAccent,
       // color: Colors.redAccent,
     ),
   };
@@ -93,60 +93,49 @@ class _BadgesState extends State<Badges> {
                   ),
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: Image.asset(
-                          'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                          errorBuilder: (context, error, stackTrace) {
-                        print(error.toString());
-                        return Icon(Icons.not_interested);
-                      }),
-                    ),
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: AutoSizeText(
-                          badgeName,
-                          maxLines: 2,
-                          wrapWords: false,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                              'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                              errorBuilder: (context, error, stackTrace) {
+                            print(error.toString());
+                            return Icon(Icons.not_interested);
+                          }),
                         ),
-                      ),
-                    ),
-                    Flexible(
-                      child: LinearPercentIndicator(
-                        percent: progress,
-                        lineHeight: 10,
-                        linearGradient: new LinearGradient(
-                          colors: [
-                            Colors.amber[200],
-                            Colors.redAccent,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        backgroundColor: Colors.grey[200],
-                        clipLinearGradient: true,
-                        trailing: Container(
-                          margin: EdgeInsets.only(left: 4),
-                          child: Text(
-                            '${(progress * 100).truncate()}%',
-                            style: TextStyle(
-                                color: Colors.redAccent[100],
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                        Expanded(
+                          child: AutoSizeText(
+                            badgeName,
+                            maxLines: 2,
+                            wrapWords: false,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 20),
                           ),
-                        ),
-                      ),
+                        )
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: (() {
+                        if (progress == 1) {
+                          return _filters['Completed'];
+                        } else if (progress == 0.5) {
+                          return _filters['In Progress'];
+                        }
+                      }()),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -159,6 +148,7 @@ class _BadgesState extends State<Badges> {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(
+        constraints: BoxConstraints.expand(),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white24,
