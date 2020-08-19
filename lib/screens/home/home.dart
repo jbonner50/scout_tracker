@@ -16,8 +16,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   int _selectedIndex = 0;
 
-  Widget _icon = Icon(Icons.add);
-
   List<Widget> _tabs;
 
   void showDrawer() {

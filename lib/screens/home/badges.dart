@@ -103,12 +103,15 @@ class _BadgesState extends State<Badges> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                              'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                              errorBuilder: (context, error, stackTrace) {
-                            print(error.toString());
-                            return Icon(Icons.not_interested);
-                          }),
+                          child: Hero(
+                            tag: badgeName,
+                            child: Image.asset(
+                                'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                                errorBuilder: (context, error, stackTrace) {
+                              print(error.toString());
+                              return Icon(Icons.not_interested);
+                            }),
+                          ),
                         ),
                         Expanded(
                           child: AutoSizeText(
@@ -147,60 +150,57 @@ class _BadgesState extends State<Badges> {
   }
 
   Widget _buildBadges(String filter, [Map filteredList]) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        constraints: BoxConstraints.expand(),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white24,
-          borderRadius: BorderRadius.circular(30),
-          // borderRadius: BorderRadius.only(
-          //     topRight: Radius.circular(50),
-          //     topLeft: Radius.circular(50)),
-        ),
-        child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: (() {
-              if (filteredList == null || (filteredList?.isEmpty ?? true)) {
-                return Container(
-                  constraints: BoxConstraints.expand(),
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        (() {
-                          switch (filter) {
-                            case 'In Progress':
-                              return 'No Badges In Progress';
-                              break;
-                            case 'Completed':
-                              return 'No Badges Completed';
-                              break;
-                            case 'Not Started':
-                              return 'All Badges Complete';
-                              break;
-                            default:
-                              return 'Could Not Retrive Badges';
-                              break;
-                          }
-                        }()),
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              } else {
-                return GridView.count(
+    return SafeArea(
+      child: (() {
+        if (filteredList == null || (filteredList?.isEmpty ?? true)) {
+          return Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                color: Colors.white,
+              ),
+              child: Text(
+                (() {
+                  switch (filter) {
+                    case 'In Progress':
+                      return 'No Badges In Progress';
+                      break;
+                    case 'Completed':
+                      return 'No Badges Completed';
+                      break;
+                    case 'Not Started':
+                      return 'All Badges Complete';
+                      break;
+                    default:
+                      return 'Could Not Retrive Badges';
+                      break;
+                  }
+                }()),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          );
+        } else {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(30),
+                  // borderRadius: BorderRadius.only(
+                  //     topRight: Radius.circular(50),
+                  //     topLeft: Radius.circular(50)),
+                ),
+                child: GridView.count(
                   crossAxisSpacing: 0,
                   mainAxisSpacing: 0,
+                  physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   crossAxisCount: 3,
                   scrollDirection: Axis.vertical,
@@ -224,10 +224,12 @@ class _BadgesState extends State<Badges> {
                                 .toDouble()),
                       )
                       .toList(),
-                );
-              }
-            }())),
-      ),
+                ),
+              ),
+            ),
+          );
+        }
+      }()),
     );
   }
 

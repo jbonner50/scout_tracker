@@ -4,24 +4,21 @@ import 'package:provider/provider.dart';
 import 'package:scout_tracker/models/rank_requirements.dart';
 import 'package:scout_tracker/services/database.dart';
 
-class Rank extends StatefulWidget {
+class RankView extends StatefulWidget {
   // final String hyphenatedRankName;
   final RankRequirementList rankRequirementList;
   final Function(bool) setChangesSaved;
-  Rank({Key key, this.rankRequirementList, this.setChangesSaved})
+  RankView({Key key, this.rankRequirementList, this.setChangesSaved})
       : super(key: key);
 
   @override
-  _RankState createState() => _RankState();
+  _RankViewState createState() => _RankViewState();
 }
 
-class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
+class _RankViewState extends State<RankView> {
   // Future _loadingRequirements;
 
-  RankRequirementList rankRequirementListModel;
+  RankRequirementList rankRequirementList;
   String alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
   Future<String> _showInitialsDialog() {
@@ -266,33 +263,30 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
-    rankRequirementListModel = widget.rankRequirementList;
+    rankRequirementList = widget.rankRequirementList;
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white24,
-          borderRadius: BorderRadius.circular(30),
-          // borderRadius: BorderRadius.only(
-          //     topRight: Radius.circular(50),
-          //     topLeft: Radius.circular(50)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: SingleChildScrollView(
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(30),
+              // borderRadius: BorderRadius.only(
+              //     topRight: Radius.circular(50),
+              //     topLeft: Radius.circular(50)),
+            ),
             child: Column(
               children: [
-                _buildRankRequirementCards(rankRequirementListModel),
-                rankRequirementListModel.note == null
+                _buildRankRequirementCards(rankRequirementList),
+                rankRequirementList.note == null
                     ? Container()
                     : Padding(
                         padding: const EdgeInsets.all(8),
@@ -303,7 +297,7 @@ class _RankState extends State<Rank> with AutomaticKeepAliveClientMixin {
                             color: Colors.white,
                           ),
                           child: Text(
-                            rankRequirementListModel.note,
+                            rankRequirementList.note,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 18,

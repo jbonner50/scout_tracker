@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:scout_tracker/models/rank_requirements.dart';
-import 'package:scout_tracker/screens/home/rank.dart';
+import 'package:scout_tracker/screens/home/rank_view.dart';
 import 'package:scout_tracker/services/database.dart';
 
 class Ranks extends StatefulWidget {
@@ -62,12 +62,13 @@ class _RanksState extends State<Ranks> {
   };
 
   Map<String, Future<RankRequirementList>> rankFirestore;
-  List<Future<Rank>> listFuturesRanks;
-  Future<List<Rank>> futureListRanks;
+  List<Future<RankView>> listFuturesRanks;
+  Future<List<RankView>> futureListRanks;
   // Future<RankRequirementList> _currentRankReqList;
 
-  Future<List<Rank>> listFuturesToFutureList(List<Future<Rank>> futures) async {
-    List<Rank> list = [];
+  Future<List<RankView>> listFuturesToFutureList(
+      List<Future<RankView>> futures) async {
+    List<RankView> list = [];
     for (var future in futures) {
       list.add(await future);
     }
@@ -85,7 +86,7 @@ class _RanksState extends State<Ranks> {
     int index = 0;
     listFuturesRanks = rankFirestore.values
         .map((Future<RankRequirementList> futureReqList) async {
-      return Rank(
+      return RankView(
           key: ValueKey(index++),
           rankRequirementList: await futureReqList,
           setChangesSaved: setChangesSaved);
