@@ -26,6 +26,8 @@ class _LoginFormState extends State<LoginForm> {
   String _email;
   String _pass;
 
+  String _loginErrorString;
+
   Widget _buildButton(progress) {
     switch (progress) {
       case Progress.loading:
@@ -37,29 +39,29 @@ class _LoginFormState extends State<LoginForm> {
           key: ValueKey(1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(50)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8, // soften the shadow
-                spreadRadius: 1, //extend the shadow
-                offset: Offset(
-                  0, // Move to right 10  horizontally
-                  3, // Move to bottom 10 Vertically
-                ),
-              )
-              // BoxShadow(
-              //   color: Colors.amber[200],
-              //   offset: Offset(1, 6),
-              //   blurRadius: 10,
-              //   spreadRadius: 1,
-              // ),
-              // BoxShadow(
-              //   color: Colors.redAccent,
-              //   offset: Offset(1, 6),
-              //   blurRadius: 10,
-              //   spreadRadius: 1,
-              // ),
-            ],
+            // boxShadow: <BoxShadow>[
+            // BoxShadow(
+            //   color: Colors.black26,
+            //   blurRadius: 8, // soften the shadow
+            //   spreadRadius: 1, //extend the shadow
+            //   offset: Offset(
+            //     0, // Move to right 10  horizontally
+            //     3, // Move to bottom 10 Vertically
+            //   ),
+            // )
+            // BoxShadow(
+            //   color: Colors.amber[200],
+            //   offset: Offset(1, 6),
+            //   blurRadius: 10,
+            //   spreadRadius: 1,
+            // ),
+            // BoxShadow(
+            //   color: Colors.redAccent,
+            //   offset: Offset(1, 6),
+            //   blurRadius: 10,
+            //   spreadRadius: 1,
+            // ),
+            // ],
             gradient: new LinearGradient(
                 colors: [
                   Colors.redAccent,
@@ -84,7 +86,12 @@ class _LoginFormState extends State<LoginForm> {
                       .login(email: _email, pass: _pass)
                       .then((AuthResultStatus status) {
                     if (status != AuthResultStatus.successful) {
-                      setState(() => _progress = Progress.button);
+                      setState(() {
+                        _progress = Progress.button;
+                        _loginErrorString =
+                            AuthExceptionHandler.generateExceptionMessage(
+                                status);
+                      });
                     }
                   });
                 } else {
@@ -128,7 +135,7 @@ class _LoginFormState extends State<LoginForm> {
       decoration: InputDecoration(
         border: InputBorder.none,
         icon: Icon(
-          Icons.mail_outline,
+          Icons.mail,
           color: Colors.black,
         ),
         hintText: "Email Address",
@@ -197,50 +204,56 @@ class _LoginFormState extends State<LoginForm> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10, // soften the shadow
-                spreadRadius: 1, //extend the shadow
-                offset: Offset(
-                  0, // Move to right 10  horizontally
-                  3, // Move to bottom 10 Vertically
-                ),
-              )
-            ],
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black26,
+            //     blurRadius: 10, // soften the shadow
+            //     spreadRadius: 1, //extend the shadow
+            //     offset: Offset(
+            //       0, // Move to right 10  horizontally
+            //       3, // Move to bottom 10 Vertically
+            //     ),
+            //   )
+            // ],
           ),
           child: Form(
             key: _loginFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _buildEmailField(),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  height: 1,
-                  color: Colors.grey[400],
-                ),
-                _buildPasswordField(),
-                SizedBox(height: 10),
-                Container(
-                  height: 70,
-                  alignment: Alignment.center,
-                  child: AnimatedSwitcher(
-                    switchInCurve: Curves.easeIn,
-                    switchOutCurve: Curves.easeOut,
-                    duration: Duration(milliseconds: 200),
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(child: child, scale: animation),
-                    child: _buildButton(_progress),
-
-                    //   _progess ==
-                    // ? _buildButton()
-                    // : SpinKitThreeBounce(
-                    //     color: Colors.deepOrangeAccent,
-                    //   )),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildEmailField(),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    height: 1,
+                    color: Colors.grey[400],
                   ),
-                ),
-              ],
+                  _buildPasswordField(),
+                  _loginErrorString != null
+                      ? Container(
+                          margin: EdgeInsets.only(top: 5, bottom: 10),
+                          child: Text(_loginErrorString))
+                      : Container(),
+                  Container(
+                    height: 70,
+                    alignment: Alignment.center,
+                    child: AnimatedSwitcher(
+                      switchInCurve: Curves.easeIn,
+                      switchOutCurve: Curves.easeOut,
+                      duration: Duration(milliseconds: 200),
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(child: child, scale: animation),
+                      child: _buildButton(_progress),
+
+                      //   _progess ==
+                      // ? _buildButton()
+                      // : SpinKitThreeBounce(
+                      //     color: Colors.deepOrangeAccent,
+                      //   )),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

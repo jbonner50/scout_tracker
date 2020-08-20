@@ -20,13 +20,17 @@ class _RegisterFormState extends State<RegisterForm> {
   Progress _progress = Progress.button;
 
   bool _obscurePasswordLogin = true;
+  bool _obscureConfirmPasswordLogin = true;
 
-  bool _autoValidateEmail = false;
+  bool _autovalidateEmail = false;
   bool _autovalidatePassword = false;
+  bool _autovalidateConfirmPassword = false;
 
   int _rankNum = 0;
   String _email;
   String _pass;
+
+  String _loginErrorString;
 
   //FocusNode _firstNameFocus;
 
@@ -74,29 +78,29 @@ class _RegisterFormState extends State<RegisterForm> {
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(50)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8, // soften the shadow
-                spreadRadius: 1, //extend the shadow
-                offset: Offset(
-                  0, // Move to right 10  horizontally
-                  3, // Move to bottom 10 Vertically
-                ),
-              )
-              // BoxShadow(
-              //   color: Colors.amber[200],
-              //   offset: Offset(1, 6),
-              //   blurRadius: 10,
-              //   spreadRadius: 1,
-              // ),
-              // BoxShadow(
-              //   color: Colors.redAccent,
-              //   offset: Offset(1, 6),
-              //   blurRadius: 10,
-              //   spreadRadius: 1,
-              // ),
-            ],
+            // boxShadow: <BoxShadow>[
+            // BoxShadow(
+            //   color: Colors.black26,
+            //   blurRadius: 8, // soften the shadow
+            //   spreadRadius: 1, //extend the shadow
+            //   offset: Offset(
+            //     0, // Move to right 10  horizontally
+            //     3, // Move to bottom 10 Vertically
+            //   ),
+            // )
+            // BoxShadow(
+            //   color: Colors.amber[200],
+            //   offset: Offset(1, 6),
+            //   blurRadius: 10,
+            //   spreadRadius: 1,
+            // ),
+            // BoxShadow(
+            //   color: Colors.redAccent,
+            //   offset: Offset(1, 6),
+            //   blurRadius: 10,
+            //   spreadRadius: 1,
+            // ),
+            // ],
             gradient: new LinearGradient(
                 colors: [
                   Colors.redAccent,
@@ -130,7 +134,12 @@ class _RegisterFormState extends State<RegisterForm> {
                       .then(
                     (AuthResultStatus status) {
                       if (status != AuthResultStatus.successful) {
-                        setState(() => _progress = Progress.button);
+                        setState(() {
+                          _progress = Progress.button;
+                          _loginErrorString =
+                              AuthExceptionHandler.generateExceptionMessage(
+                                  status);
+                        });
                       }
                     },
                   );
@@ -138,8 +147,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   print('invalid');
                   setState(
                     () {
-                      _autoValidateEmail = true;
+                      _autovalidateEmail = true;
                       _autovalidatePassword = true;
+                      _autovalidateConfirmPassword = true;
                     },
                   );
                 }
@@ -168,7 +178,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   Widget _buildEmailField() {
     return TextFormField(
-      autovalidate: _autoValidateEmail,
+      autovalidate: _autovalidateEmail,
       validator: (email) =>
           EmailValidator.validate(email) ? null : "Invalid email address",
       onSaved: (email) => _email = email,
@@ -196,7 +206,7 @@ class _RegisterFormState extends State<RegisterForm> {
         else
           return null;
       },
-      onSaved: (password) => _pass = password,
+      onChanged: (password) => _pass = password,
       style: TextStyle(fontSize: 20, color: Colors.black),
       obscureText: _obscurePasswordLogin,
       decoration: InputDecoration(
@@ -216,6 +226,43 @@ class _RegisterFormState extends State<RegisterForm> {
             // Update the state i.e. toogle the state of passwordVisible variable
             setState(() {
               _obscurePasswordLogin = !_obscurePasswordLogin;
+            });
+            HapticFeedback.selectionClick();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfirmPasswordField() {
+    return TextFormField(
+      autovalidate: _autovalidateConfirmPassword,
+      validator: (confirmpassword) {
+        if (confirmpassword != _pass)
+          return 'Passwords do not match';
+        else
+          return null;
+      },
+      onSaved: (password) => _pass = password,
+      style: TextStyle(fontSize: 20, color: Colors.black),
+      obscureText: _obscureConfirmPasswordLogin,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        icon: Icon(
+          Icons.vpn_key,
+          color: Colors.black,
+        ),
+        hintText: "Confirm Password",
+        suffixIcon: IconButton(
+          icon: Icon(
+            // Based on passwordVisible state choose the icon
+            _obscurePasswordLogin ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            // Update the state i.e. toogle the state of passwordVisible variable
+            setState(() {
+              _obscureConfirmPasswordLogin = !_obscureConfirmPasswordLogin;
             });
             HapticFeedback.selectionClick();
           },
@@ -258,44 +305,56 @@ class _RegisterFormState extends State<RegisterForm> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10, // soften the shadow
-                spreadRadius: 1, //extend the shadow
-                offset: Offset(
-                  0, // Move to right 10  horizontally
-                  3, // Move to bottom 10 Vertically
-                ),
-              )
-            ],
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.black26,
+            //     blurRadius: 10, // soften the shadow
+            //     spreadRadius: 1, //extend the shadow
+            //     offset: Offset(
+            //       0, // Move to right 10  horizontally
+            //       3, // Move to bottom 10 Vertically
+            //     ),
+            //   )
+            // ],
           ),
           child: Form(
             key: _registerFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _buildEmailField(),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  height: 1,
-                  color: Colors.grey[400],
-                ),
-                _buildPasswordField(),
-                SizedBox(height: 10),
-                Container(
-                  height: 70,
-                  alignment: Alignment.center,
-                  child: AnimatedSwitcher(
-                    switchInCurve: Curves.easeIn,
-                    switchOutCurve: Curves.easeOut,
-                    duration: Duration(milliseconds: 200),
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(child: child, scale: animation),
-                    child: _buildButton(_progress),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildEmailField(),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    height: 1,
+                    color: Colors.grey[400],
                   ),
-                ),
-              ],
+                  _buildPasswordField(),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    height: 1,
+                    color: Colors.grey[400],
+                  ),
+                  _buildConfirmPasswordField(),
+                  _loginErrorString != null
+                      ? Container(
+                          margin: EdgeInsets.only(top: 5, bottom: 10),
+                          child: Text(_loginErrorString))
+                      : Container(),
+                  Container(
+                    height: 70,
+                    alignment: Alignment.center,
+                    child: AnimatedSwitcher(
+                      switchInCurve: Curves.easeIn,
+                      switchOutCurve: Curves.easeOut,
+                      duration: Duration(milliseconds: 200),
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(child: child, scale: animation),
+                      child: _buildButton(_progress),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

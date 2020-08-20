@@ -46,7 +46,6 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-
     return StreamProvider<String>.value(
       initialData: 'loading',
       value: AuthService().user.map((user) => user?.uid),

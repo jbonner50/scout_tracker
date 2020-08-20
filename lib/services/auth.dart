@@ -68,8 +68,7 @@ class AuthService {
 }
 
 class AuthExceptionHandler {
-  static handleException(e) {
-    print(e.code);
+  static AuthResultStatus handleException(e) {
     var status;
     switch (e.code) {
       case "ERROR_INVALID_EMAIL":
@@ -102,7 +101,7 @@ class AuthExceptionHandler {
   ///
   /// Accepts AuthExceptionHandler.errorType
   ///
-  static generateExceptionMessage(exceptionCode) {
+  static String generateExceptionMessage(exceptionCode) {
     String errorMessage;
     switch (exceptionCode) {
       case AuthResultStatus.invalidEmail:
