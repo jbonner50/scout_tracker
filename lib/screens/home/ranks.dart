@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -120,10 +121,20 @@ class _RanksState extends State<Ranks> {
           return Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
+              centerTitle: false,
               // leading: IconButton(
               //     icon: Icon(Icons.menu), onPressed: widget.showDrawer()),
               backgroundColor: Colors.white,
+              brightness: Brightness.light,
               elevation: 0,
+              leading: IconButton(
+                splashRadius: 20,
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.redAccent[100],
+                ),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
               title: DropdownButtonHideUnderline(
                 child: StreamBuilder(
                     stream: DatabaseService(uid: uid).user,
@@ -133,33 +144,24 @@ class _RanksState extends State<Ranks> {
                         return DropdownButton(
                           iconEnabledColor: Colors.redAccent[100],
                           value: _currentRankIndex,
-                          // selectedItemBuilder: (BuildContext context) {
-                          //   return rankNames.map((String rankName) {
-                          //     return Row(
-                          //       // mainAxisSize: MainAxisSize.min,
-                          //       mainAxisAlignment:
-                          //           MainAxisAlignment.spaceBetween,
-                          //       children: [
-                          //         Text(
-                          //           rankName,
-                          //           style: TextStyle(
-                          //               color: _currentRankIndex ==
-                          //                       rankNames.indexOf(rankName)
-                          //                   ? Colors.redAccent[100]
-                          //                   : Colors.black,
-                          //               fontSize: 24,
-                          //               fontWeight: FontWeight.bold,
-                          //               letterSpacing: 1),
-                          //         ),
-                          //         // SizedBox(width: 10),
-                          //         Icon(
-                          //           Icons.ac_unit,
-                          //           color: Colors.blue,
-                          //         ),
-                          //       ],
-                          //     );
-                          //   }).toList();
-                          // },
+                          selectedItemBuilder: (context) =>
+                              rankNames.map((rankName) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  rankName,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                      color: Colors.redAccent[100],
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1),
+                                ),
+                                SizedBox(width: 10),
+                              ],
+                            );
+                          }).toList(),
                           items: rankNames.map((rankName) {
                             double _progress = data[
                                     rankName.toLowerCase().replaceAll(' ', '-')]
@@ -172,12 +174,13 @@ class _RanksState extends State<Ranks> {
                                 children: [
                                   Text(
                                     rankName,
+                                    maxLines: 1,
                                     style: TextStyle(
                                         color: _currentRankIndex ==
                                                 rankNames.indexOf(rankName)
                                             ? Colors.redAccent[100]
-                                            : Colors.black,
-                                        fontSize: 24,
+                                            : Colors.grey[700],
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1),
                                   ),

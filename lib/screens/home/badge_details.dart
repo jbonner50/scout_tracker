@@ -110,7 +110,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
           if (snapshot.hasData) {
             return WillPopScope(
               onWillPop: () async {
-                if (_changesSaved) {
+                if (_changesSaved ?? true) {
                   return true;
                 } else {
                   return await _showSaveDialog(
@@ -120,6 +120,8 @@ class _BadgeDetailsState extends State<BadgeDetails> {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: AppBar(
+                  centerTitle: false,
+
                   leading: IconButton(
                     splashRadius: 20,
                     icon: Icon(
@@ -127,7 +129,7 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                       color: Colors.redAccent[100],
                     ),
                     onPressed: () async {
-                      if (_changesSaved) {
+                      if (_changesSaved ?? true) {
                         return Navigator.of(context).pop();
                       } else {
                         await _showSaveDialog(
@@ -140,6 +142,8 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                   // leading: IconButton(
                   //     icon: Icon(Icons.menu), onPressed: widget.showDrawer()),
                   backgroundColor: Colors.white,
+                  brightness: Brightness.light,
+
                   title: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

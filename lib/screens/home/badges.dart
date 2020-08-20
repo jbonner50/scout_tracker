@@ -54,98 +54,68 @@ class _BadgesState extends State<Badges> {
     ),
   };
 
-  Widget _buildBadgeTile(String badgeName, double progress) {
+  Widget _buildBadgeListTile(String badgeName, double progress) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 4, // soften the shadow
-              spreadRadius: 1, //extend the shadow
-              offset: Offset(
-                0, // Move to right 10  horizontally
-                2, // Move to bottom 10 Vertically
-              ),
-            )
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: Material(
-            child: InkWell(
-              splashColor: Colors.redAccent[100],
-              highlightColor: Colors.grey.withOpacity(0.15),
-              // When the user taps the button, show a snackbar.
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a1, a2) => BadgeDetails(
-                      badgeName: badgeName,
-                    ),
-                    transitionsBuilder: (c, anim, a2, child) =>
-                        FadeTransition(opacity: anim, child: child),
-                    transitionDuration: Duration(milliseconds: 200),
-                  ),
-                );
-              },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Hero(
-                            tag: badgeName,
-                            child: Image.asset(
-                                'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
-                                errorBuilder: (context, error, stackTrace) {
-                              print(error.toString());
-                              return Icon(Icons.not_interested);
-                            }),
-                          ),
-                        ),
-                        Expanded(
-                          child: AutoSizeText(
-                            badgeName,
-                            maxLines: 2,
-                            wrapWords: false,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: (() {
-                        if (progress == 1) {
-                          return _progressIndicators['Completed'];
-                        } else if (progress == 0.5) {
-                          return _progressIndicators['In Progress'];
-                        } else {
-                          return Container();
-                        }
-                      }()),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4, // soften the shadow
+                spreadRadius: 1, //extend the shadow
+                offset: Offset(
+                  0, // Move to right 10  horizontally
+                  1, // Move to bottom 10 Vertically
+                ),
+              )
+            ],
           ),
-        ),
-      ),
+          child: ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => BadgeDetails(
+                    badgeName: badgeName,
+                  ),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 200),
+                ),
+              );
+            },
+            leading: Hero(
+              tag: badgeName,
+              child: Image.asset(
+                  'assets/images/badges/${badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '')}.png',
+                  errorBuilder: (context, error, stackTrace) {
+                print(error.toString());
+                return Icon(
+                  Icons.not_interested,
+                  color: Colors.grey[200],
+                );
+              }),
+            ),
+            title: AutoSizeText(
+              badgeName,
+              maxLines: 1,
+              wrapWords: false,
+              style: TextStyle(fontSize: 20),
+            ),
+            trailing: (() {
+              if (progress == 1) {
+                return _progressIndicators['Completed'];
+              } else if (progress == 0.5) {
+                return _progressIndicators['In Progress'];
+              } else {
+                return Icon(Icons.not_interested, color: Colors.transparent);
+              }
+            }()),
+          )),
     );
   }
 
@@ -197,25 +167,17 @@ class _BadgesState extends State<Badges> {
                   //     topRight: Radius.circular(50),
                   //     topLeft: Radius.circular(50)),
                 ),
-                child: GridView.count(
-                  crossAxisSpacing: 0,
-                  mainAxisSpacing: 0,
+                child: ListView(
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  crossAxisCount: 3,
-                  scrollDirection: Axis.vertical,
-                  childAspectRatio: 0.85,
                   //todo combine badgeSearchList with filteredbadgelist
-                  children: (eagleOnly
-                          ? badgeList.where(
-                              (badgeName) => eagleList.contains(badgeName))
-                          : badgeList)
+                  children: (eagleOnly ? eagleList : badgeList)
                       .where((badgeName) => filteredList.containsKey(badgeName
                           .toLowerCase()
                           .replaceAll(' ', '-')
                           .replaceAll(',', '')))
                       .map<Widget>(
-                        (badgeName) => _buildBadgeTile(
+                        (badgeName) => _buildBadgeListTile(
                             badgeName,
                             filteredList[badgeName
                                     .toLowerCase()
@@ -240,10 +202,21 @@ class _BadgesState extends State<Badges> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        centerTitle: false,
         elevation: 0,
         // leading: IconButton(
         //     icon: Icon(Icons.menu), onPressed: widget.showDrawer()),
         backgroundColor: Colors.white,
+        brightness: Brightness.light,
+
+        leading: IconButton(
+          splashRadius: 20,
+          icon: Icon(
+            Icons.menu,
+            color: Colors.redAccent[100],
+          ),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
         title: DropdownButtonHideUnderline(
           child: DropdownButton(
             iconEnabledColor: Colors.redAccent[100],
@@ -257,8 +230,8 @@ class _BadgesState extends State<Badges> {
                       color: _currentFilterIndex ==
                               _progressIndicators.keys.toList().indexOf(filter)
                           ? Colors.redAccent[100]
-                          : Colors.black,
-                      fontSize: 24,
+                          : Colors.grey[700],
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1),
                 ),
@@ -273,7 +246,10 @@ class _BadgesState extends State<Badges> {
               Text(
                 'Eagle Only',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(
+                  color: Colors.redAccent[100],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Switch(
                 activeColor: Colors.redAccent[100],

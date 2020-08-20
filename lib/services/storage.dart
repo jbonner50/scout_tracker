@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart';
+import 'package:scout_tracker/services/auth.dart';
 
 class StorageService {
   final String uid;
@@ -31,8 +32,8 @@ class StorageService {
     }
   }
 
-  Future<void> saveBadgeJson(String hyphenatedBadgeName) async {
-    final directory = await getApplicationDocumentsDirectory();
+  Future<void> saveBadgeJson(
+      String hyphenatedBadgeName, Directory directory) async {
     File badgeFile = File('${directory.path}/badges/$hyphenatedBadgeName.json');
     if (!badgeFile.existsSync()) {
       //   //add new loadout to file
@@ -54,11 +55,15 @@ class StorageService {
   Future<void> saveAllBadgesJson(List badgeNames) async {
     // final dir = await getApplicationDocumentsDirectory();
     // dir.deleteSync(recursive: true);
+    if (AuthService().user != null) {
+      final directory = await getApplicationDocumentsDirectory();
 
-    for (var badgeName in badgeNames) {
-      String hyphenatedBadgeName =
-          badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
-      saveBadgeJson(hyphenatedBadgeName);
+      for (var badgeName in badgeNames) {
+        String hyphenatedBadgeName =
+            badgeName.toLowerCase().replaceAll(' ', '-').replaceAll(',', '');
+
+        saveBadgeJson(hyphenatedBadgeName, directory);
+      }
     }
   }
 
@@ -95,8 +100,8 @@ class StorageService {
     }
   }
 
-  Future<void> saveRankJson(String hyphenatedRankName) async {
-    final directory = await getApplicationDocumentsDirectory();
+  Future<void> saveRankJson(
+      String hyphenatedRankName, Directory directory) async {
     File rankFile = File('${directory.path}/ranks/$hyphenatedRankName.json');
     if (!rankFile.existsSync()) {
       //   //add new loadout to file
@@ -117,18 +122,23 @@ class StorageService {
   Future<void> saveAllRanksJson() async {
     // final dir = await getApplicationDocumentsDirectory();
     // dir.deleteSync(recursive: true);
-    final List<String> rankNames = [
-      'Scout',
-      'Tenderfoot',
-      'Second Class',
-      'First Class',
-      'Star',
-      'Life',
-      'Eagle',
-    ];
-    for (var rankName in rankNames) {
-      String hyphenatedRankName = rankName.toLowerCase().replaceAll(' ', '-');
-      await saveRankJson(hyphenatedRankName);
+
+    if (AuthService().user != null) {
+      final List<String> rankNames = [
+        'Scout',
+        'Tenderfoot',
+        'Second Class',
+        'First Class',
+        'Star',
+        'Life',
+        'Eagle',
+      ];
+      final directory = await getApplicationDocumentsDirectory();
+
+      for (var rankName in rankNames) {
+        String hyphenatedRankName = rankName.toLowerCase().replaceAll(' ', '-');
+        await saveRankJson(hyphenatedRankName, directory);
+      }
     }
   }
 
