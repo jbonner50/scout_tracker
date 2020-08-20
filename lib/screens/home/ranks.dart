@@ -28,13 +28,13 @@ class _RanksState extends State<Ranks> {
   ];
 
   final List<bool> _changesSaved = [
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
-    true,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
   ];
 
   void setChangesSaved(bool newValue) {
@@ -206,47 +206,50 @@ class _RanksState extends State<Ranks> {
               ),
 
               actions: [
-                Container(
-                  margin: EdgeInsets.only(right: 10),
-                  child: FilterChip(
-                    pressElevation: 0,
-                    checkmarkColor: Colors.white,
-                    backgroundColor: Colors.redAccent[100],
-                    selectedColor: Colors.greenAccent,
-                    selected: _changesSaved[_currentRankIndex],
-                    onSelected: (newValue) async {
-                      if (newValue) {
-                        DatabaseService database = DatabaseService(uid: uid);
-                        database
-                            .updateRankDocument(
-                                snapshot.data.rankRequirementList,
-                                rankNames
-                                    .elementAt(_currentRankIndex)
-                                    .toLowerCase()
-                                    .replaceAll(' ', '-'))
-                            .whenComplete(() =>
-                                database.updateRankProgressField(
-                                    rankNames
-                                        .elementAt(_currentRankIndex)
-                                        .toLowerCase()
-                                        .replaceAll(' ', '-')
-                                        .replaceAll(',', ''),
-                                    snapshot.data.rankRequirementList));
-                        print(_currentRankIndex);
-                        print('saved reqs');
-                        setChangesSaved(true);
-                      }
-                    },
-                    label: Text(
-                      _changesSaved[_currentRankIndex] ? 'Saved' : 'Save',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                _changesSaved[_currentRankIndex] == null
+                    ? Container()
+                    : Container(
+                        margin: EdgeInsets.only(right: 10),
+                        child: FilterChip(
+                          pressElevation: 0,
+                          checkmarkColor: Colors.white,
+                          backgroundColor: Colors.redAccent[100],
+                          selectedColor: Colors.greenAccent,
+                          selected: _changesSaved[_currentRankIndex],
+                          onSelected: (newValue) async {
+                            if (newValue) {
+                              DatabaseService database =
+                                  DatabaseService(uid: uid);
+                              database
+                                  .updateRankDocument(
+                                      snapshot.data.rankRequirementList,
+                                      rankNames
+                                          .elementAt(_currentRankIndex)
+                                          .toLowerCase()
+                                          .replaceAll(' ', '-'))
+                                  .whenComplete(() =>
+                                      database.updateRankProgressField(
+                                          rankNames
+                                              .elementAt(_currentRankIndex)
+                                              .toLowerCase()
+                                              .replaceAll(' ', '-')
+                                              .replaceAll(',', ''),
+                                          snapshot.data.rankRequirementList));
+                              print(_currentRankIndex);
+                              print('saved reqs');
+                              setChangesSaved(true);
+                            }
+                          },
+                          label: Text(
+                            _changesSaved[_currentRankIndex] ? 'Saved' : 'Save',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
               ],
             ),
             // body: Rank(rankRequirementList: snapshot.data),

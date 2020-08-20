@@ -20,7 +20,7 @@ class BadgeDetails extends StatefulWidget {
 }
 
 class _BadgeDetailsState extends State<BadgeDetails> {
-  bool _changesSaved = true;
+  bool _changesSaved;
 
   void setChangesSaved(bool newValue) {
     setState(() => _changesSaved = newValue);
@@ -168,47 +168,50 @@ class _BadgeDetailsState extends State<BadgeDetails> {
                     ],
                   ),
                   actions: [
-                    Container(
-                      margin: EdgeInsets.only(right: 10),
-                      child: FilterChip(
-                        pressElevation: 0,
-                        checkmarkColor: Colors.white,
-                        backgroundColor: Colors.redAccent[100],
-                        selectedColor: Colors.greenAccent,
-                        selected: _changesSaved,
-                        onSelected: (newValue) async {
-                          if (newValue) {
-                            DatabaseService database =
-                                DatabaseService(uid: uid);
-                            database
-                                .updateBadgeDocument(
-                                    snapshot.data.badgeRequirementList,
-                                    widget.badgeName
-                                        .toLowerCase()
-                                        .replaceAll(' ', '-')
-                                        .replaceAll(',', ''))
-                                .whenComplete(() =>
-                                    database.updateBadgeProgressField(
-                                        widget.badgeName
-                                            .toLowerCase()
-                                            .replaceAll(' ', '-')
-                                            .replaceAll(',', ''),
-                                        snapshot.data.badgeRequirementList));
+                    _changesSaved == null
+                        ? Container()
+                        : Container(
+                            margin: EdgeInsets.only(right: 10),
+                            child: FilterChip(
+                              pressElevation: 0,
+                              checkmarkColor: Colors.white,
+                              backgroundColor: Colors.redAccent[100],
+                              selectedColor: Colors.greenAccent,
+                              selected: _changesSaved,
+                              onSelected: (newValue) async {
+                                if (newValue) {
+                                  DatabaseService database =
+                                      DatabaseService(uid: uid);
+                                  database
+                                      .updateBadgeDocument(
+                                          snapshot.data.badgeRequirementList,
+                                          widget.badgeName
+                                              .toLowerCase()
+                                              .replaceAll(' ', '-')
+                                              .replaceAll(',', ''))
+                                      .whenComplete(() =>
+                                          database.updateBadgeProgressField(
+                                              widget.badgeName
+                                                  .toLowerCase()
+                                                  .replaceAll(' ', '-')
+                                                  .replaceAll(',', ''),
+                                              snapshot
+                                                  .data.badgeRequirementList));
 
-                            print('saved reqs');
-                            setState(() => _changesSaved = true);
-                          }
-                        },
-                        label: Text(
-                          _changesSaved ? 'Saved' : 'Save',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                                  print('saved reqs');
+                                  setState(() => _changesSaved = true);
+                                }
+                              },
+                              label: Text(
+                                _changesSaved ? 'Saved' : 'Save',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 body: Stack(
