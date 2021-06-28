@@ -1,7 +1,8 @@
-# scout_tracker
+# Scout Tracker
 
-An IOS and Android application for Boy Scouts to track Rank and Merit Badge progress.
+An iOS and Android application for Boy Scouts to track requirement progress for ranks and merit badges. Cross-platform saves and realtime updates. Email is only used for login purposes, no spam. Currently only released on Google Play, but iOS is coming soon.
 
-# Email Verification
-
-Email verifcation link must be opened on your mobile device. If you were sent to this page instead, it is because you opened your verification link on a computer instead.
+![Login Screen](login.jpg)
+![Rank Screen](rank.jpg)
+![Badges Screen](badges.jpg)
+![Badge Requirements Screen](badge_reqs.jpg)
