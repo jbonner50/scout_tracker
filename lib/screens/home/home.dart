@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scout_tracker/screens/home/badges.dart';
 import 'package:scout_tracker/screens/home/profile.dart';
 import 'package:scout_tracker/screens/home/ranks.dart';
@@ -13,7 +16,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // int _currentIndex = 0;
   // TabController _tabController;
-
+  List<String> badgeList;
+  List<String> eagleList;
   int _selectedIndex = 0;
 
   List<Widget> _tabs;
@@ -23,16 +27,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     Scaffold.of(context).openDrawer();
   }
 
-  @override
-  void initState() {
-    // _tabController = TabController(length: 3, vsync: this);
-    // _tabController.animation.addListener(() => _handleTabChange());
-    _tabs = [
-      Ranks(key: ValueKey(1), showDrawer: showDrawer),
-      Badges(key: ValueKey(2), showDrawer: showDrawer),
-    ];
-    super.initState();
+  Future<void> _setBadgeLists() async {
+    String text = await rootBundle.loadString('data/badge_list.txt');
+    badgeList = LineSplitter().convert(text);
+    badgeList.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    // badgeSearchList = List.from(badgeList);
+    text = await rootBundle.loadString('data/eagle_list.txt');
+    eagleList = LineSplitter().convert(text);
+    return true;
   }
+
+  // @override
+  // void initState() {
+  //   // _tabController = TabController(length: 3, vsync: this);
+  //   // _tabController.animation.addListener(() => _handleTabChange());
+
+  //   super.initState();
+  // }
 
   @override
   void dispose() {
@@ -131,7 +142,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             // AnimatedSwitcher(
             //     duration: Duration(milliseconds: 200),
             //     child:
-            _tabs.elementAt(_selectedIndex),
+            FutureBuilder(
+                future: _setBadgeLists().then((_) => [
+                      Ranks(key: ValueKey(1), showDrawer: showDrawer),
+                      Badges(
+                        key: ValueKey(2),
+                        showDrawer: showDrawer,
+                        badgeList: badgeList,
+                        eagleList: eagleList,
+                      ),
+                    ]),
+                builder: (context, snapshot) {
+                  return snapshot.hasData
+                      ? snapshot.data.elementAt(_selectedIndex)
+                      : Container();
+                }),
 
         // floatingActionButton: SpeedDial(
         //   backgroundColor: Colors.white,

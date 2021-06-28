@@ -1,5 +1,5 @@
 name: scout_tracker
-description: A new Flutter project.
+description: Rank and merit badge tracking app for Scouting.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -52,6 +52,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.7.4
+
+flutter_icons:
+  android: true
+  image_path: "assets/images/general/scout_logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

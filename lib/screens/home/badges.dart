@@ -11,28 +11,17 @@ import 'package:scout_tracker/services/database.dart';
 
 class Badges extends StatefulWidget {
   final Function showDrawer;
-  Badges({Key key, this.showDrawer}) : super(key: key);
+  final List<String> badgeList;
+  final List<String> eagleList;
+  Badges({Key key, this.showDrawer, this.badgeList, this.eagleList})
+      : super(key: key);
 
   @override
   _BadgesState createState() => _BadgesState();
 }
 
 class _BadgesState extends State<Badges> {
-  List<String> badgeList = [];
-
-  List<String> eagleList = [];
-
   bool eagleOnly = false;
-
-  Future<void> _setBadgeLists() async {
-    String text = await rootBundle.loadString('data/badge_list.txt');
-    badgeList = LineSplitter().convert(text);
-    badgeList.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    // badgeSearchList = List.from(badgeList);
-    text = await rootBundle.loadString('data/eagle_list.txt');
-    eagleList = LineSplitter().convert(text);
-    return true;
-  }
 
   int _currentFilterIndex = 0;
   Map<String, Widget> _progressIndicators = {
@@ -171,7 +160,7 @@ class _BadgesState extends State<Badges> {
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   //todo combine badgeSearchList with filteredbadgelist
-                  children: (eagleOnly ? eagleList : badgeList)
+                  children: (eagleOnly ? widget.eagleList : widget.badgeList)
                       .where((badgeName) => filteredList.containsKey(badgeName
                           .toLowerCase()
                           .replaceAll(' ', '-')
@@ -301,47 +290,38 @@ class _BadgesState extends State<Badges> {
       //   // ),
       // ),
 
-      body: FutureBuilder(
-          future: _setBadgeLists(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return StreamBuilder(
-                stream: DatabaseService(uid: uid).user,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    Map data = Map.from(snapshot.data['badge_progress']);
-                    Map filteredBadges = {};
-                    if (_currentFilterIndex == 0) {
-                      filteredBadges = data;
-                    } else if (_currentFilterIndex == 1) {
-                      data.forEach((key, value) {
-                        if (value > 0 && value < 1)
-                          filteredBadges.addAll({key: value});
-                      });
-                    } else if (_currentFilterIndex == 2) {
-                      data.forEach((key, value) {
-                        if (value == 1) filteredBadges.addAll({key: value});
-                      });
-                    } else {
-                      data.forEach((key, value) {
-                        if (value == 0) filteredBadges.addAll({key: value});
-                      });
-                    }
-
-                    return _buildBadges(
-                        _progressIndicators.keys
-                            .toList()
-                            .elementAt(_currentFilterIndex),
-                        filteredBadges);
-                  } else {
-                    return Container();
-                  }
-                },
-              );
+      body: StreamBuilder(
+        stream: DatabaseService(uid: uid).user,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            Map data = Map.from(snapshot.data['badge_progress']);
+            Map filteredList = {};
+            if (_currentFilterIndex == 0) {
+              filteredList = data;
+            } else if (_currentFilterIndex == 1) {
+              data.forEach((key, value) {
+                if (value > 0 && value < 1) filteredList.addAll({key: value});
+              });
+            } else if (_currentFilterIndex == 2) {
+              data.forEach((key, value) {
+                if (value == 1) filteredList.addAll({key: value});
+              });
             } else {
-              return Container();
+              data.forEach((key, value) {
+                if (value == 0) filteredList.addAll({key: value});
+              });
             }
-          }),
+
+            return _buildBadges(
+                _progressIndicators.keys
+                    .toList()
+                    .elementAt(_currentFilterIndex),
+                filteredList);
+          } else {
+            return Container();
+          }
+        },
+      ),
     );
   }
 }
